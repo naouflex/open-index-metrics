@@ -1,0 +1,19 @@
+# Docker files
+Dockerfile
+docker-compose.yml
+nginx.conf
+deploy.sh
+
+# Cache service (replaced by serverless functions)
+cache-service/
+
+# Development files
+.env.local
+.env.development
+
+# Documentation
+README.md
+VERCEL_DEPLOYMENT.md
+
+# Pro config (use only if on Pro plan)
+vercel.pro.json 

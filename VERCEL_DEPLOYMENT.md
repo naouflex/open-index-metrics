@@ -61,6 +61,17 @@ vercel --prod
 
 ## Step 4: Configure Cron Jobs
 
+### Hobby Plan (Free) - Daily Updates
+The default `vercel.json` is configured for daily updates at midnight (0 0 * * *).
+
+### Pro Plan ($20/month) - Hourly Updates  
+If you want hourly data updates, upgrade to Pro and use `vercel.pro.json`:
+```bash
+# Rename the pro config to use hourly updates
+mv vercel.pro.json vercel.json
+```
+
+### Testing Cron Jobs
 1. In Vercel dashboard, go to Functions tab
 2. Verify the cron job is scheduled for `/api/cron/update-data`
 3. Test the cron endpoint manually:
@@ -121,9 +132,24 @@ vercel dev
 
 ## Cost Optimization
 
-- **Hobby Plan**: Free tier covers most small projects
-- **Pro Plan**: $20/month for production apps
-- **KV Storage**: First 30GB and 100M requests free per month
+### Hobby Plan (Free)
+- ✅ Perfect for development and personal projects
+- ✅ Daily cron jobs (24-hour data refresh)
+- ✅ 100GB bandwidth per month
+- ✅ 100K function executions per month
+- ❌ Limited to daily cron jobs only
+
+### Pro Plan ($20/month)
+- ✅ Ideal for production DeFi dashboards
+- ✅ Hourly cron jobs (real-time data refresh)
+- ✅ 1TB bandwidth per month  
+- ✅ 1M function executions per month
+- ✅ Priority support
+
+### KV Storage (Both Plans)
+- ✅ First 30GB and 100M requests free per month
+- ✅ Redis-compatible commands
+- ✅ Global edge distribution
 
 ## Troubleshooting
 

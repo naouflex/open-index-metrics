@@ -27,7 +27,8 @@ export default async function handler(req, res) {
       try {
         const data = await coinGeckoFetcher.fetchCoinData(coinId);
         const cacheKey = `coingecko:market-data:${coinId}`;
-        await kvManager.set(cacheKey, data, 3600);
+        // Cache for 25 hours to ensure coverage between daily runs
+        await kvManager.set(cacheKey, data, 90000);
         results.success.push(coinId);
       } catch (error) {
         console.error(`Failed to cache ${coinId}:`, error);
