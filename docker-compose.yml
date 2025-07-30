@@ -1,0 +1,57 @@
+
+services:
+  # Main application with Nginx proxy
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - cache-service
+      - redis
+    environment:
+      - NODE_ENV=production
+      - CACHE_SERVICE_URL=http://cache-service:4000
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+
+  # Data caching service
+  cache-service:
+    build:
+      context: ./cache-service
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    depends_on:
+      - redis
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      # API Keys (hidden from frontend)
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+      - THE_GRAPH_API_KEY=${THE_GRAPH_API_KEY}
+      - ETH_RPC_URL=${ETH_RPC_URL}
+      - ETH_RPC_URL_FALLBACK=${ETH_RPC_URL_FALLBACK}
+      # Subgraph IDs for The Graph Protocol
+      - UNISWAP_V3_SUBGRAPH_ID=${UNISWAP_V3_SUBGRAPH_ID}
+      - UNISWAP_V2_SUBGRAPH_ID=${UNISWAP_V2_SUBGRAPH_ID}
+      - SUSHI_SUBGRAPH_ID=${SUSHI_SUBGRAPH_ID}
+      - SUSHI_V2_SUBGRAPH_ID=${SUSHI_V2_SUBGRAPH_ID}
+      - CURVE_SUBGRAPH_ID=${CURVE_SUBGRAPH_ID}
+      - FRAXSWAP_SUBGRAPH_ID=${FRAXSWAP_SUBGRAPH_ID}
+      - BALANCER_V2_SUBGRAPH_ID=${BALANCER_V2_SUBGRAPH_ID}
+
+    restart: unless-stopped
+
+  # Redis for hot data caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data: 

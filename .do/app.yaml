@@ -1,0 +1,80 @@
+name: open-dashboard
+services:
+- name: web
+  source_dir: /
+  github:
+    repo: naouflex/open-index-metrics
+    branch: main
+  build_command: npm ci && npm run build
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  routes:
+  - path: /
+  http_port: 8080
+  run_command: |
+    cat > serve.js << 'EOF'
+    const express = require('express');
+    const path = require('path');
+    const app = express();
+    const port = process.env.PORT || 8080;
+
+    // Serve static files from dist directory
+    app.use(express.static(path.join(__dirname, 'dist')));
+
+    // Handle React Router
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    });
+
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+    EOF
+    node serve.js
+
+- name: cache-service
+  source_dir: /cache-service
+  github:
+    repo: naouflex/open-index-metrics
+    branch: main
+  build_command: npm ci
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  routes:
+  - path: /api
+  http_port: 4000
+  run_command: npm start
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: REDIS_URL
+    value: ${redis.DATABASE_URL}
+  - key: COINGECKO_API_KEY
+    value: ${COINGECKO_API_KEY}
+  - key: THE_GRAPH_API_KEY
+    value: ${THE_GRAPH_API_KEY}
+  - key: ETH_RPC_URL
+    value: ${ETH_RPC_URL}
+  - key: ETH_RPC_URL_FALLBACK
+    value: ${ETH_RPC_URL_FALLBACK}
+  - key: UNISWAP_V3_SUBGRAPH_ID
+    value: ${UNISWAP_V3_SUBGRAPH_ID}
+  - key: UNISWAP_V2_SUBGRAPH_ID
+    value: ${UNISWAP_V2_SUBGRAPH_ID}
+  - key: SUSHI_SUBGRAPH_ID
+    value: ${SUSHI_SUBGRAPH_ID}
+  - key: SUSHI_V2_SUBGRAPH_ID
+    value: ${SUSHI_V2_SUBGRAPH_ID}
+  - key: CURVE_SUBGRAPH_ID
+    value: ${CURVE_SUBGRAPH_ID}
+  - key: FRAXSWAP_SUBGRAPH_ID
+    value: ${FRAXSWAP_SUBGRAPH_ID}
+  - key: BALANCER_V2_SUBGRAPH_ID
+    value: ${BALANCER_V2_SUBGRAPH_ID}
+
+databases:
+- name: redis
+  engine: REDIS
+  version: "7" 
