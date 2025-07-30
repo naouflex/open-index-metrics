@@ -168,9 +168,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           borderRight="2px solid"
           borderRightColor={useColorModeValue('gray.300', 'gray.600')}
           boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-          minW="350px"
-          maxW="350px"
-          w="350px"
+          minW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+          maxW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+          w={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
         >
           {protocol.ticker}
         </Td>
@@ -264,9 +264,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           borderRight="2px solid"
           borderRightColor={useColorModeValue('gray.300', 'gray.600')}
           boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-          minW="350px"
-          maxW="350px"
-          w="350px"
+          minW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+          maxW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+          w={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
         >
           {protocol.ticker}
         </Td>
@@ -301,20 +301,27 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           _hover={{ bg: hoverBgColor }}
         whiteSpace="nowrap"
       >
-        <VStack align="start" spacing={2}>
-          <VStack align="start" spacing={1}>
-            <Text fontWeight="bold" fontSize="sm" isTruncated>{protocol.ticker}</Text>
-            <Text fontSize="xs" color="gray.500" isTruncated>{protocol.name}</Text>
+        <VStack align="start" spacing={{ base: 0, md: 2 }}>
+          <VStack align="start" spacing={0}>
+            <Text fontWeight="bold" fontSize={{ base: "2xs", sm: "sm" }} isTruncated>{protocol.ticker}</Text>
+            <Text 
+              fontSize={{ base: "2xs", sm: "xs" }} 
+              color="gray.500" 
+              isTruncated
+              display={{ base: "none", sm: "block" }}
+            >
+              {protocol.name}
+            </Text>
           </VStack>
-          <HStack spacing={1} flexWrap="wrap">
+          <HStack spacing={1} flexWrap="wrap" display={{ base: "none", sm: "flex" }}>
             {protocol.govContractAddress && (
               <Link href={`https://etherscan.io/address/${protocol.govContractAddress}`} isExternal>
                 <Badge 
                   colorScheme="blue" 
-                  size="sm" 
+                  size={{ base: "xs", sm: "sm" }}
                   cursor="pointer" 
                   _hover={{ bg: 'blue.600', color: 'white' }}
-                  display="flex"
+                  display={{ base: "none", sm: "flex" }}
                   alignItems="center"
                   gap={1}
                 >
@@ -327,10 +334,10 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
               <Link href={`https://www.coingecko.com/en/coins/${protocol.coingeckoId}`} isExternal>
                 <Badge 
                   colorScheme="green" 
-                  size="sm" 
+                  size={{ base: "xs", sm: "sm" }}
                   cursor="pointer" 
                   _hover={{ bg: 'green.600', color: 'white' }}
-                  display="flex"
+                  display={{ base: "none", sm: "flex" }}
                   alignItems="center"
                   gap={1}
                 >
@@ -343,10 +350,10 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
               <Link href={`https://defillama.com/protocol/${protocol.defiLlamaSlug}`} isExternal>
                 <Badge 
                   colorScheme="purple" 
-                  size="sm" 
+                  size={{ base: "xs", sm: "sm" }}
                   cursor="pointer" 
                   _hover={{ bg: 'purple.600', color: 'white' }}
-                  display="flex"
+                  display={{ base: "none", sm: "flex" }}
                   alignItems="center"
                   gap={1}
                 >
@@ -855,7 +862,7 @@ export default function DeFiDashboard() {
       <Box 
         flex="1"
         overflow="hidden"
-        p={6}
+        p={{ base: 2, sm: 4, md: 6 }}
       >
         <Box 
           h="100%"
@@ -866,7 +873,7 @@ export default function DeFiDashboard() {
           borderRadius="md"
           position="relative"
         >
-          <Table size="sm" variant="simple" sx={{ '& td:first-child, & th:first-child': { position: 'sticky !important', left: 0 } }}>
+          <Table size={{ base: "xs", sm: "sm" }} variant="simple" sx={{ '& td:first-child, & th:first-child': { position: 'sticky !important', left: 0 } }}>
             <Thead bg={tableHeaderBg} position="sticky" top={0} zIndex={3}>
               <Tr>
                 {/* Basic Info */}
@@ -876,7 +883,7 @@ export default function DeFiDashboard() {
                   onSort={handleSort} 
                   onReset={handleReset} 
                   dataSource="CoinGecko"
-                  fontSize="xs"
+                  fontSize={{ base: "2xs", sm: "xs" }}
                   position="sticky"
                   left={0}
                   bg={tableHeaderBg}
@@ -884,9 +891,9 @@ export default function DeFiDashboard() {
                   borderRight="2px solid"
                   borderRightColor={useColorModeValue('gray.300', 'gray.600')}
                   boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-                  minW="350px"
-                  maxW="350px"
-                  w="350px"
+                  minW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+                  maxW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+                  w={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
                 >
                   Protocol
                 </SortableHeader>
@@ -927,7 +934,7 @@ export default function DeFiDashboard() {
                 </Th>
                 
                 {/* DEX Data */}
-                <Th fontSize="xs" color="red.600">
+                <Th fontSize={{ base: "2xs", sm: "xs" }} color="red.600">
                   <VStack spacing={1} align="start">
                     <HStack spacing={1}>
                       <Text>Curve TVL</Text>

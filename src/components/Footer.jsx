@@ -23,15 +23,15 @@ export default function Footer() {
       maxW="100vw"
       overflow="hidden"
     >
-      <Container maxW="none" px={6} py={4}>
-        <VStack spacing={3} align="center">
-          <Text fontSize="sm" color="gray.500" textAlign="center">
+      <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 3, md: 4 }}>
+        <VStack spacing={{ base: 2, md: 3 }} align="center">
+          <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500" textAlign="center">
             Data sources: CoinGecko, DeFiLlama, The Graph Protocol, Curve API
           </Text>
           <Text fontSize="xs" color="gray.400" textAlign="center">
             Last updated: {new Date().toLocaleString()}
           </Text>
-          <HStack spacing={4} justify="center" flexWrap="wrap">
+          <HStack spacing={{ base: 2, md: 4 }} justify="center" flexWrap="wrap">
             <Text fontSize="xs" color="gray.400" textAlign="center">
               Made with{' '}
               <Text as="span" color="blue.500">💙</Text>
@@ -40,7 +40,7 @@ export default function Footer() {
                 Naoufel
               </Link>
             </Text>
-            <Text fontSize="xs" color="gray.400">•</Text>
+            <Text fontSize="xs" color="gray.400" display={{ base: "none", sm: "inline" }}>•</Text>
             <Link 
               href="https://github.com/naouflex/open-index-metrics/" 
               isExternal 
@@ -51,7 +51,8 @@ export default function Footer() {
               alignItems="center"
               gap={1}
             >
-              Contribute on GitHub
+              <Text display={{ base: "none", sm: "inline" }}>Contribute on GitHub</Text>
+              <Text display={{ base: "inline", sm: "none" }}>GitHub</Text>
               <ExternalLinkIcon boxSize={2} />
             </Link>
           </HStack>

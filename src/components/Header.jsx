@@ -8,7 +8,8 @@ import {
   useColorModeValue,
   Flex,
   Image,
-  HStack
+  HStack,
+  Text
 } from '@chakra-ui/react';
 import { SunIcon, MoonIcon } from '@chakra-ui/icons';
 
@@ -49,22 +50,27 @@ export default function Header() {
       maxW="100vw"
       overflow="hidden"
     >
-      <Container maxW="none" px={6} py={4}>
-        <Flex justify="space-between" align="center" minH="60px">
-          <HStack spacing={4} flex="1" mr={4}>
+      <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 3, md: 4 }}>
+        <Flex justify="space-between" align="center" minH={{ base: "50px", md: "60px" }}>
+          <HStack spacing={{ base: 2, md: 4 }} flex="1" mr={{ base: 2, md: 4 }}>
             <Image 
               src="/logo.svg" 
               alt="Open Index Logo" 
-              height="40px" 
-              width="40px"
+              height={{ base: "30px", sm: "35px", md: "40px" }}
+              width={{ base: "30px", sm: "35px", md: "40px" }}
               flexShrink={0}
             />
             <Heading 
-              size="lg" 
+              size={{ base: "sm", sm: "md", md: "lg" }}
               color={useColorModeValue('gray.800', 'white')}
               noOfLines={1}
             >
-              Metrics: $OPEN index (Constituents & Proposed)
+              <Text as="span" display={{ base: "none", sm: "inline" }}>
+                Metrics: $OPEN index (Constituents & Proposed)
+              </Text>
+              <Text as="span" display={{ base: "inline", sm: "none" }}>
+                $OPEN
+              </Text>
             </Heading>
           </HStack>
           <ColorModeToggle />
