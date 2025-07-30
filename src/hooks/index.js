@@ -27,15 +27,9 @@ export {
 
 // Curve hooks
 export {
-  useCurvePools,
-  useCurveVolumes,
   useCurveTVL,
   useCurve24hVolume,
-  useCurveTVLOptimized,
-  useCurve24hVolumeOptimized,
-  useCurveTokenData,
-  useCurveTokenDataOptimized,
-  useCurvePoolsForToken
+  useCurveTokenData
 } from './useCurve.js';
 
 // DeFiLlama hooks
@@ -84,4 +78,48 @@ export {
   useSushiTotalVolume24h,
   useSushiTokenData,
   useSushiComplete
-} from './useSushiSwap.js'; 
+} from './useSushiSwap.js';
+
+// Uniswap hooks
+export {
+  // V3 hooks
+  useUniswapV3TVL,
+  useUniswapV3Volume24h,
+  useUniswapV3TokenInfo,
+  useUniswapV3PoolsForToken,
+  useUniswapV3TokenData,
+  useUniswapV3DetailedPools,
+  // V2 hooks
+  useUniswapV2TVL,
+  useUniswapV2Volume24h,
+  useUniswapV2PairsForToken,
+  useUniswapV2TVLOptimized,
+  useUniswapV2TokenData,
+  useUniswapV2TokenDataOptimized,
+  useUniswapV2DetailedPairs,
+  // Combined hooks
+  useUniswapTotalTVL,
+  useUniswapTotalVolume24h,
+  useUniswapTokenData,
+  useUniswapComplete
+} from './useUniswap.js';
+
+// Ethereum on-chain hooks
+export {
+  useTokenBalance,
+  useTokenBalanceFormatted,
+  useTokenBalanceWithUSD,
+  useTokenDecimals,
+  useTokenName,
+  useTokenSymbol,
+  useTokenTotalSupply, // Renamed to avoid conflict with CoinGecko's useTotalSupply
+  useAllowance,
+  useTokenInfo,
+  useCurrentBlock,
+  useGasPrice,
+  useMultipleTokenBalances,
+  useMultipleTokenBalancesWithUSD,
+  usePortfolioValue,
+  useEthereumUtils
+} from './useEthereum.js';
+

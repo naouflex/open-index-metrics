@@ -1,27 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
 import {
-  fetchSushiTokenTVL,
-  fetchSushiTokenVolume,
-  fetchSushiV2TokenTVL,
-  fetchSushiV2TokenVolume24h,
-  fetchSushiTotalTVL,
-  fetchSushiTotalVolume24h
+  fetchUniswapTokenTVL,
+  fetchUniswapV2TokenTVL,
+  fetchUniswapTotalTVL,
+  fetchUniswapV2TokenVolume24h,
+  fetchUniswapV3TokenVolume24h,
+  fetchUniswapTotalVolume24h
 } from '../services/cache-client.js';
 
-// ================= SUSHISWAP HOOKS =================
+// ================= UNISWAP HOOKS =================
 
-// ================= SUSHISWAP V3 HOOKS =================
+// ================= UNISWAP V3 HOOKS =================
 
 /**
- * Hook to get SushiSwap V3 TVL for a specific token
+ * Hook to get Uniswap V3 TVL for a specific token
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with V3 TVL data
  */
-export function useSushiV3TVL(tokenAddress, options = {}) {
+export function useUniswapV3TVL(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'v3', 'tvl', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchSushiTokenTVL(tokenAddress),
+    queryKey: ['uniswap', 'v3', 'tvl', tokenAddress?.toLowerCase()],
+    queryFn: () => fetchUniswapTokenTVL(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -32,15 +32,15 @@ export function useSushiV3TVL(tokenAddress, options = {}) {
 }
 
 /**
- * Hook to get SushiSwap V3 volume for a specific token
+ * Hook to get Uniswap V3 24h volume for a specific token
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with V3 volume data
  */
-export function useSushiV3Volume(tokenAddress, options = {}) {
+export function useUniswapV3Volume24h(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'v3', 'volume', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchSushiTokenVolume(tokenAddress),
+    queryKey: ['uniswap', 'v3', 'volume24h', tokenAddress?.toLowerCase()],
+    queryFn: () => fetchUniswapV3TokenVolume24h(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
@@ -51,15 +51,15 @@ export function useSushiV3Volume(tokenAddress, options = {}) {
 }
 
 /**
- * Hook to get SushiSwap V3 token information
+ * Hook to get Uniswap V3 token information
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with V3 token info
  */
-export function useSushiV3TokenInfo(tokenAddress, options = {}) {
+export function useUniswapV3TokenInfo(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'v3', 'tokenInfo', tokenAddress?.toLowerCase()],
-    queryFn: () => getSushiV3TokenInfo(tokenAddress),
+    queryKey: ['uniswap', 'v3', 'tokenInfo', tokenAddress?.toLowerCase()],
+    queryFn: () => getUniswapV3TokenInfo(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 10 * 60 * 1000, // 10 minutes
     cacheTime: 30 * 60 * 1000, // 30 minutes
@@ -69,18 +69,37 @@ export function useSushiV3TokenInfo(tokenAddress, options = {}) {
   });
 }
 
-// ================= SUSHISWAP V2 HOOKS =================
+/**
+ * Hook to get Uniswap V3 pools for a specific token
+ * @param {string} tokenAddress - The token contract address
+ * @param {object} options - Query options
+ * @returns {object} Query result with V3 pools data
+ */
+export function useUniswapV3PoolsForToken(tokenAddress, options = {}) {
+  return useQuery({
+    queryKey: ['uniswap', 'v3', 'pools', tokenAddress?.toLowerCase()],
+    queryFn: () => getUniswapV3PoolsForToken(tokenAddress),
+    enabled: !!tokenAddress,
+    staleTime: 10 * 60 * 1000, // 10 minutes (pools don't change often)
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+    retry: 2,
+    retryDelay: 1000,
+    ...options
+  });
+}
+
+// ================= UNISWAP V2 HOOKS =================
 
 /**
- * Hook to get SushiSwap V2 TVL for a specific token
+ * Hook to get Uniswap V2 TVL for a specific token
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with V2 TVL data
  */
-export function useSushiV2TVL(tokenAddress, options = {}) {
+export function useUniswapV2TVL(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'v2', 'tvl', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchSushiV2TokenTVL(tokenAddress),
+    queryKey: ['uniswap', 'v2', 'tvl', tokenAddress?.toLowerCase()],
+    queryFn: () => fetchUniswapV2TokenTVL(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -91,15 +110,15 @@ export function useSushiV2TVL(tokenAddress, options = {}) {
 }
 
 /**
- * Hook to get SushiSwap V2 24h volume for a specific token
+ * Hook to get Uniswap V2 24h volume for a specific token
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with V2 volume data
  */
-export function useSushiV2Volume24h(tokenAddress, options = {}) {
+export function useUniswapV2Volume24h(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'v2', 'volume24h', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchSushiV2TokenVolume24h(tokenAddress),
+    queryKey: ['uniswap', 'v2', 'volume24h', tokenAddress?.toLowerCase()],
+    queryFn: () => fetchUniswapV2TokenVolume24h(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
@@ -110,15 +129,15 @@ export function useSushiV2Volume24h(tokenAddress, options = {}) {
 }
 
 /**
- * Hook to get SushiSwap V2 pairs for a specific token
+ * Hook to get Uniswap V2 pairs for a specific token
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with V2 pairs data
  */
-export function useSushiV2PairsForToken(tokenAddress, options = {}) {
+export function useUniswapV2PairsForToken(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'v2', 'pairs', tokenAddress?.toLowerCase()],
-    queryFn: () => getSushiV2PairsForToken(tokenAddress),
+    queryKey: ['uniswap', 'v2', 'pairs', tokenAddress?.toLowerCase()],
+    queryFn: () => getUniswapV2PairsForToken(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 10 * 60 * 1000, // 10 minutes (pairs don't change often)
     cacheTime: 30 * 60 * 1000, // 30 minutes
@@ -134,12 +153,12 @@ export function useSushiV2PairsForToken(tokenAddress, options = {}) {
  * @param {object} options - Query options
  * @returns {object} Query result with V2 TVL calculated from cached pairs
  */
-export function useSushiV2TVLOptimized(tokenAddress, options = {}) {
-  const pairsQuery = useSushiV2PairsForToken(tokenAddress);
+export function useUniswapV2TVLOptimized(tokenAddress, options = {}) {
+  const pairsQuery = useUniswapV2PairsForToken(tokenAddress);
   
   return useQuery({
-    queryKey: ['sushiswap', 'v2', 'tvlOptimized', tokenAddress?.toLowerCase()],
-    queryFn: () => calculateSushiV2TVLFromPairs(tokenAddress, pairsQuery.data),
+    queryKey: ['uniswap', 'v2', 'tvlOptimized', tokenAddress?.toLowerCase()],
+    queryFn: () => calculateUniswapV2TVLFromPairs(tokenAddress, pairsQuery.data),
     enabled: !!tokenAddress && !!pairsQuery.data,
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -147,18 +166,18 @@ export function useSushiV2TVLOptimized(tokenAddress, options = {}) {
   });
 }
 
-// ================= COMBINED SUSHISWAP HOOKS =================
+// ================= COMBINED UNISWAP HOOKS =================
 
 /**
- * Hook to get total SushiSwap TVL (V2 + V3) for a specific token
+ * Hook to get total Uniswap TVL (V2 + V3) for a specific token
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with combined TVL data
  */
-export function useSushiTotalTVL(tokenAddress, options = {}) {
+export function useUniswapTotalTVL(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'total', 'tvl', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchSushiTotalTVL(tokenAddress),
+    queryKey: ['uniswap', 'total', 'tvl', tokenAddress?.toLowerCase()],
+    queryFn: () => fetchUniswapTotalTVL(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -169,15 +188,15 @@ export function useSushiTotalTVL(tokenAddress, options = {}) {
 }
 
 /**
- * Hook to get total SushiSwap 24h volume (V2 + V3) for a specific token
+ * Hook to get total Uniswap 24h volume (V2 + V3) for a specific token
  * @param {string} tokenAddress - The token contract address
  * @param {object} options - Query options
  * @returns {object} Query result with combined volume data
  */
-export function useSushiTotalVolume24h(tokenAddress, options = {}) {
+export function useUniswapTotalVolume24h(tokenAddress, options = {}) {
   return useQuery({
-    queryKey: ['sushiswap', 'total', 'volume24h', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchSushiTotalVolume24h(tokenAddress),
+    queryKey: ['uniswap', 'total', 'volume24h', tokenAddress?.toLowerCase()],
+    queryFn: () => fetchUniswapTotalVolume24h(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
@@ -190,13 +209,13 @@ export function useSushiTotalVolume24h(tokenAddress, options = {}) {
 // ================= CONVENIENCE HOOKS =================
 
 /**
- * Hook to get SushiSwap V3 data (TVL + Volume) for a token
+ * Hook to get Uniswap V3 data (TVL + Volume) for a token
  * @param {string} tokenAddress - The token contract address
  * @returns {object} Combined V3 data for TVL and volume
  */
-export function useSushiV3TokenData(tokenAddress) {
-  const tvlQuery = useSushiV3TVL(tokenAddress);
-  const volumeQuery = useSushiV3Volume(tokenAddress);
+export function useUniswapV3TokenData(tokenAddress) {
+  const tvlQuery = useUniswapV3TVL(tokenAddress);
+  const volumeQuery = useUniswapV3Volume24h(tokenAddress);
   
   return {
     tvl: {
@@ -205,7 +224,7 @@ export function useSushiV3TokenData(tokenAddress) {
       error: tvlQuery.error,
       isError: tvlQuery.isError
     },
-    volume: {
+    volume24h: {
       data: volumeQuery.data || 0,
       isLoading: volumeQuery.isLoading,
       error: volumeQuery.error,
@@ -217,13 +236,13 @@ export function useSushiV3TokenData(tokenAddress) {
 }
 
 /**
- * Hook to get SushiSwap V2 data (TVL + Volume) for a token
+ * Hook to get Uniswap V2 data (TVL + Volume) for a token
  * @param {string} tokenAddress - The token contract address
  * @returns {object} Combined V2 data for TVL and volume
  */
-export function useSushiV2TokenData(tokenAddress) {
-  const tvlQuery = useSushiV2TVL(tokenAddress);
-  const volumeQuery = useSushiV2Volume24h(tokenAddress);
+export function useUniswapV2TokenData(tokenAddress) {
+  const tvlQuery = useUniswapV2TVL(tokenAddress);
+  const volumeQuery = useUniswapV2Volume24h(tokenAddress);
   
   return {
     tvl: {
@@ -244,13 +263,13 @@ export function useSushiV2TokenData(tokenAddress) {
 }
 
 /**
- * Hook to get SushiSwap V2 data using optimized queries
+ * Hook to get Uniswap V2 data using optimized queries
  * @param {string} tokenAddress - The token contract address
  * @returns {object} Combined optimized V2 data for TVL and volume
  */
-export function useSushiV2TokenDataOptimized(tokenAddress) {
-  const tvlQuery = useSushiV2TVLOptimized(tokenAddress);
-  const volumeQuery = useSushiV2Volume24h(tokenAddress);
+export function useUniswapV2TokenDataOptimized(tokenAddress) {
+  const tvlQuery = useUniswapV2TVLOptimized(tokenAddress);
+  const volumeQuery = useUniswapV2Volume24h(tokenAddress);
   
   return {
     tvl: {
@@ -271,13 +290,13 @@ export function useSushiV2TokenDataOptimized(tokenAddress) {
 }
 
 /**
- * Hook to get complete SushiSwap data (V2 + V3) for a token
+ * Hook to get complete Uniswap data (V2 + V3) for a token
  * @param {string} tokenAddress - The token contract address
- * @returns {object} Combined data for all SushiSwap versions
+ * @returns {object} Combined data for all Uniswap versions
  */
-export function useSushiTokenData(tokenAddress) {
-  const totalTvlQuery = useSushiTotalTVL(tokenAddress);
-  const totalVolumeQuery = useSushiTotalVolume24h(tokenAddress);
+export function useUniswapTokenData(tokenAddress) {
+  const totalTvlQuery = useUniswapTotalTVL(tokenAddress);
+  const totalVolumeQuery = useUniswapTotalVolume24h(tokenAddress);
   
   return {
     totalTvl: {
@@ -298,14 +317,14 @@ export function useSushiTokenData(tokenAddress) {
 }
 
 /**
- * Comprehensive hook that fetches all SushiSwap data for a token
+ * Comprehensive hook that fetches all Uniswap data for a token
  * @param {string} tokenAddress - The token contract address
  * @returns {object} Complete breakdown of V2, V3, and combined data
  */
-export function useSushiComplete(tokenAddress) {
-  const v2Data = useSushiV2TokenData(tokenAddress);
-  const v3Data = useSushiV3TokenData(tokenAddress);
-  const totalData = useSushiTokenData(tokenAddress);
+export function useUniswapComplete(tokenAddress) {
+  const v2Data = useUniswapV2TokenData(tokenAddress);
+  const v3Data = useUniswapV3TokenData(tokenAddress);
+  const totalData = useUniswapTokenData(tokenAddress);
   
   return {
     v2: v2Data,
@@ -321,11 +340,11 @@ export function useSushiComplete(tokenAddress) {
  * @param {string} tokenAddress - The token contract address
  * @returns {object} Query result with detailed V2 pairs information
  */
-export function useSushiV2DetailedPairs(tokenAddress) {
-  const pairsQuery = useSushiV2PairsForToken(tokenAddress);
+export function useUniswapV2DetailedPairs(tokenAddress) {
+  const pairsQuery = useUniswapV2PairsForToken(tokenAddress);
   
   return useQuery({
-    queryKey: ['sushiswap', 'v2', 'detailedPairs', tokenAddress?.toLowerCase()],
+    queryKey: ['uniswap', 'v2', 'detailedPairs', tokenAddress?.toLowerCase()],
     queryFn: () => {
       if (!pairsQuery.data) return [];
       
@@ -340,6 +359,37 @@ export function useSushiV2DetailedPairs(tokenAddress) {
       })).sort((a, b) => b.reserveUSD - a.reserveUSD); // Sort by TVL descending
     },
     enabled: !!tokenAddress && !!pairsQuery.data,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+  });
+}
+
+/**
+ * Hook to get detailed V3 pool information for a token
+ * @param {string} tokenAddress - The token contract address
+ * @returns {object} Query result with detailed V3 pools information
+ */
+export function useUniswapV3DetailedPools(tokenAddress) {
+  const poolsQuery = useUniswapV3PoolsForToken(tokenAddress);
+  
+  return useQuery({
+    queryKey: ['uniswap', 'v3', 'detailedPools', tokenAddress?.toLowerCase()],
+    queryFn: () => {
+      if (!poolsQuery.data) return [];
+      
+      return poolsQuery.data.map(pool => ({
+        id: pool.id,
+        token0: pool.token0,
+        token1: pool.token1,
+        feeTier: pool.feeTier,
+        totalValueLockedUSD: Number(pool.totalValueLockedUSD || 0),
+        volumeUSD: Number(pool.volumeUSD || 0),
+        createdAt: new Date(pool.createdAtTimestamp * 1000),
+        poolName: `${pool.token0.symbol}/${pool.token1.symbol}`,
+        feePercentage: pool.feeTier / 10000 // Convert to percentage (e.g., 3000 -> 0.3%)
+      })).sort((a, b) => b.totalValueLockedUSD - a.totalValueLockedUSD); // Sort by TVL descending
+    },
+    enabled: !!tokenAddress && !!poolsQuery.data,
     staleTime: 10 * 60 * 1000, // 10 minutes
     cacheTime: 30 * 60 * 1000, // 30 minutes
   });

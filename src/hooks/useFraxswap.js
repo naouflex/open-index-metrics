@@ -1,11 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchFraxswapTokenTVL,
-  fetchFraxswapTokenVolume,
-  getFraxswapPairsForToken,
-  calculateTVLFromFraxswapPairs,
-  getFraxswapPairsVolume
-} from '../services/fraxswap.js';
+  fetchFraxswap24hVolume
+} from '../services/cache-client.js';
 
 // ================= FRAXSWAP HOOKS =================
 
@@ -37,7 +34,7 @@ export function useFraxswapTVL(tokenAddress, options = {}) {
 export function useFraxswap24hVolume(tokenAddress, options = {}) {
   return useQuery({
     queryKey: ['fraxswap', 'volume24h', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchFraxswapTokenVolume(tokenAddress),
+    queryFn: () => fetchFraxswap24hVolume(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes

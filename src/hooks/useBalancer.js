@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchBalancerTokenTVL, fetchBalancerTokenVolume } from '../services/balancer.js';
+import { fetchBalancerTokenTVL, fetchBalancer24hVolume } from '../services/cache-client.js';
 
 // ================= BALANCER HOOKS =================
 
@@ -31,7 +31,7 @@ export function useBalancerTVL(tokenAddress, options = {}) {
 export function useBalancer24hVolume(tokenAddress, options = {}) {
   return useQuery({
     queryKey: ['balancer', 'volume24h', tokenAddress?.toLowerCase()],
-    queryFn: () => fetchBalancerTokenVolume(tokenAddress),
+    queryFn: () => fetchBalancer24hVolume(tokenAddress),
     enabled: !!tokenAddress,
     staleTime: 2 * 60 * 1000, // 2 minutes (volume changes more frequently)
     cacheTime: 5 * 60 * 1000, // 5 minutes

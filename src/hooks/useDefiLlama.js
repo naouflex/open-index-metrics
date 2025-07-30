@@ -4,10 +4,8 @@ import {
   getTokenPrice,
   getMultipleTokenPrices,
   getProtocolInfo,
-  getAllProtocols,
-  getProtocolTVLHistory,
-  getProtocolTVLByChain
-} from '../services/defillama.js';
+  getAllProtocols
+} from '../services/cache-client.js';
 
 // ================= DEFILLAMA HOOKS =================
 
