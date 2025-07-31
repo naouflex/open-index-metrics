@@ -9,7 +9,7 @@ export const protocols = [
     defiLlamaSlug: "fx-protocol",
     blockchain: "ethereum",
     mainnetLaunch: "2023-08-01",
-    openStatus: "proposed",
+    openStatus: "current",
     nextEmissions: 44100,
     emissionsCatalyst: "Gauge emissions"
   },
@@ -21,7 +21,7 @@ export const protocols = [
     defiLlamaSlug: "ethena-usde",
     blockchain: "ethereum",
     mainnetLaunch: "2024-02-01",
-    openStatus: "current",
+    openStatus: "watchlist",
     nextEmissions: 1500000000,
     emissionsCatalyst: "Airdrop/team/investor vesting, ecosystem incentives"
   },
@@ -33,7 +33,7 @@ export const protocols = [
     defiLlamaSlug: "origin-ether",
     blockchain: "ethereum",
     mainnetLaunch: "2018-10-01",
-    openStatus: "proposed",
+    openStatus: "current",
     nextEmissions: 241000000,
     emissionsCatalyst: "Team/investor vesting, ecosystem incentives"
   },
@@ -81,7 +81,7 @@ export const protocols = [
     defiLlamaSlug: "alchemix",
     blockchain: "ethereum",
     mainnetLaunch: "2021-02-01",
-    openStatus: "proposed",
+    openStatus: "current",
     nextEmissions: 114000,
     emissionsCatalyst: "Ecosystem incentives and team vesting"
   },
@@ -93,7 +93,7 @@ export const protocols = [
     defiLlamaSlug: "maple",
     blockchain: "ethereum",
     mainnetLaunch: "2021-05-01",
-    openStatus: "proposed",
+    openStatus: "watchlist",
     nextEmissions: 500000,
     emissionsCatalyst: "emissions only set to last 3 years as well so won't be any more at the end of 2026"
   },

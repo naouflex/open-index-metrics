@@ -64,8 +64,12 @@ export default function Header() {
               size={{ base: "sm", sm: "md", md: "lg" }}
               color={useColorModeValue('gray.800', 'white')}
               noOfLines={1}
+              fontWeight="bold"
+              fontFamily="Inter"
+              
             >
-              <Text as="span" display={{ base: "none", sm: "inline" }}>
+              <Text as="span" display={{ base: "none", sm: "inline" } } 
+              textAlign="center">
                 Metrics: $OPEN index (Constituents & Proposed)
               </Text>
               <Text as="span" display={{ base: "inline", sm: "none" }}>
