@@ -831,7 +831,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Emissions */}
       <Td 
         textAlign="center"
-        minW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
+        W={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
         maxW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
         w={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
       >
@@ -1232,14 +1232,14 @@ export default function DeFiDashboard() {
   };
 
   return (
-    <Box bg={bgColor} h="100%" display="flex" flexDirection="column">
+    <Box bg={bgColor} h={{ base: "auto", md: "100%" }} display="flex" flexDirection="column">
       <Box 
         flex="1"
         overflow="hidden"
         p={{ base: 2, sm: 4, md: 6 }}
       >
         <Box 
-          h="100%"
+          h={{ base: "70vh", sm: "75vh", md: "100%" }}
           overflowX="auto" 
           overflowY="auto"
           border="1px solid" 
