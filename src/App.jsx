@@ -1,7 +1,6 @@
-import { ChakraProvider, extendTheme, ColorModeScript, Flex, Box } from '@chakra-ui/react'
+import { ChakraProvider, extendTheme, ColorModeScript } from '@chakra-ui/react'
 import DeFiDashboard from './components/DeFiDashboard'
-import Header from './components/Header'
-import Footer from './components/Footer'
+import Layout from './components/Layout'
 
 // Custom theme
 const theme = extendTheme({
@@ -29,19 +28,9 @@ function App() {
     <>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
       <ChakraProvider theme={theme}>
-        <Flex 
-          direction="column" 
-          h="100vh" 
-          w="100vw" 
-          maxW="100vw" 
-          overflow="hidden"
-        >
-          <Header />
-          <Box flex="1" overflow="hidden">
-            <DeFiDashboard />
-          </Box>
-          <Footer />
-        </Flex>
+        <Layout>
+          <DeFiDashboard />
+        </Layout>
       </ChakraProvider>
     </>
   )

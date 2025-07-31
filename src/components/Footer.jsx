@@ -21,6 +21,11 @@ export default function Footer() {
       borderColor={borderColor}
       w="100vw"
       maxW="100vw"
+      minW="100vw"
+      position="sticky"
+      bottom={0}
+      zIndex={1000}
+      shadow="sm"
       overflow="hidden"
     >
       <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 1, md: 2 }}>
@@ -32,7 +37,7 @@ export default function Footer() {
             Last updated: {new Date().toLocaleString()}
           </Text>
           <HStack spacing={{ base: 2, md: 4 }} justify="center" flexWrap="wrap">
-            <Text fontSize="xs" color="gray.400" textAlign="center">
+            <Text fontSize="xs" color="gray.400">
               Made with{' '}
               <Text as="span" color="blue.500">💙</Text>
               {' '}by{' '}

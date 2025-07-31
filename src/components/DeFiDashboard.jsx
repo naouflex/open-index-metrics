@@ -176,8 +176,8 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
   if (!shouldLoad) {
     return (
       <Tr _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }} transition="background-color 0.2s">
-        <Td
-        textAlign="center"
+                <Td
+          textAlign="center"
           position="sticky"
           left={0}
           bg={useColorModeValue('white', 'gray.800')}
@@ -189,7 +189,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
           w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
         >
-          {protocol.ticker}
+          <Text textAlign="center" fontWeight="bold">
+            {protocol.ticker}
+          </Text>
         </Td>
         <Td>
           <Skeleton height="20px" width="90px" />
@@ -213,7 +215,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
     (protocol.ticker === 'ALCX' && alcxDeadBalance.isError) ||
     (protocol.ticker === 'FRAX' && (fraxswapTVLForFrax.isError || fraxswapVolumeForFrax.isError));
   
-  // For FXN protocol, add holder balance USD to market cap
+  // For FXN protocol, add veFXN balance USD to market cap
   const marketCap = protocol.ticker === 'FXN' 
     ? ((coinGeckoData.marketData?.data?.market_cap || 0) + (fxnHolderBalance.data?.balanceUSD || 0))
     : (coinGeckoData.marketData?.data?.market_cap || 0);
@@ -235,7 +237,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
   // DEX aggregation
   const dexTVLs = [
     curveTVL.data || 0,
-    // For INV protocol, add token balances to Uniswap TVL
+    // For INV protocol, add missing pool balances to Uniswap TVL
     protocol.ticker === 'INV' 
       ? ((uniswapTVL.data || 0) + (invToken1Balance.data?.balanceUSD || 0) + (invToken2Balance.data?.balanceUSD || 0))
       : (uniswapTVL.data || 0),
@@ -281,8 +283,8 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
   if (hasError) {
     return (
       <Tr _hover={{ bg: hoverBgColor }} transition="background-color 0.2s">
-        <Td
-        textAlign="center"
+                <Td
+          textAlign="center"
           position="sticky"
           left={0}
           bg={bgColor}
@@ -294,7 +296,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
           w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
         >
-          {protocol.ticker}
+          <Text textAlign="center" fontWeight="bold">
+            {protocol.ticker}
+          </Text>
         </Td>
         <Td>
           <Text fontSize="xs" color="gray.500">N/A</Text>
@@ -334,19 +338,26 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
         maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
         w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
       >
-        <VStack align="start" spacing={{ base: 0, md: 2 }}>
-          <VStack align="start" spacing={0}>
-            <Text fontWeight="bold" fontSize={{ base: "2xs", sm: "sm" }} isTruncated>{protocol.ticker}</Text>
+        <VStack align="center" spacing={{ base: 0, md: 2 }} justify="center" h="100%">
+          <VStack align="center" spacing={0}>
+            <Text 
+              fontWeight="bold" 
+              fontSize={{ base: "2xs", sm: "sm" }} 
+              isTruncated
+              textAlign="center"
+            >
+              {protocol.ticker}
+            </Text>
             <Text 
               fontSize={{ base: "2xs", sm: "xs" }} 
               color="gray.500" 
               isTruncated
               display={{ base: "none", sm: "block" }}
+              textAlign="center"
             >
               {protocol.name}
             </Text>
           </VStack>
-
         </VStack>
       </Td>
       
@@ -943,7 +954,7 @@ function DataSourceBadge({ source }) {
       {/* Modal for mobile */}
       <Modal isOpen={isOpen} onClose={onClose} size="sm">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent mx={{ base: 4, sm: 6 }}>
           <ModalHeader fontSize="lg">Data Source</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -1003,7 +1014,7 @@ function SpecialTreatmentBadge({ explanation, protocolTicker }) {
       {/* Modal for mobile */}
       <Modal isOpen={isOpen} onClose={onClose} size="sm">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent mx={{ base: 4, sm: 6 }}>
           <ModalHeader fontSize="lg">Special Calculation - {protocolTicker}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -1020,7 +1031,7 @@ function SpecialTreatmentBadge({ explanation, protocolTicker }) {
 
 // ================= SORTABLE HEADER COMPONENT =================
 
-function SortableHeader({ column, currentSort, onSort, onReset, dataSource, children, ...props }) {
+function SortableHeader({ column, currentSort, onSort, onReset, dataSource, children, centerVertically = false, ...props }) {
   const isActive = currentSort.column === column;
   const isAsc = isActive && currentSort.direction === 'asc';
   const isDesc = isActive && currentSort.direction === 'desc';
@@ -1035,8 +1046,16 @@ function SortableHeader({ column, currentSort, onSort, onReset, dataSource, chil
       textAlign="center"
       {...props}
     >
-      <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-        <HStack spacing={1} mb={2}>
+      <Box 
+        position="relative" 
+        h="90px" 
+        display="flex" 
+        flexDirection="column" 
+        alignItems="center" 
+        justifyContent={centerVertically ? "center" : "flex-start"} 
+        pt={centerVertically ? 0 : 2}
+      >
+        <HStack spacing={1} mb={centerVertically ? 0 : 2}>
           <Text>{children}</Text>
           {isActive && (
             <Icon as={isAsc ? TriangleUpIcon : TriangleDownIcon} boxSize={3} />
@@ -1232,532 +1251,564 @@ export default function DeFiDashboard() {
   };
 
   return (
-    <Box bg={bgColor} h={{ base: "auto", md: "100%" }} display="flex" flexDirection="column">
+    <Box 
+      display="flex" 
+      flexDirection="column" 
+      h={{ 
+        base: "calc(100vh - 160px)", // Extra space to ensure scrollbar visibility
+        sm: "calc(100vh - 160px)",   // Extra space to ensure scrollbar visibility
+        md: "calc(100vh - 160px)"    // Extra space to ensure scrollbar visibility
+      }}
+      w="100vw"
+      maxW="100vw"
+      py={{ base: 1, sm: 2, md: 3 }}
+      px={{ base: 1, sm: 2, md: 3 }}
+    >
       <Box 
         flex="1"
-        overflow="hidden"
-        p={{ base: 2, sm: 4, md: 6 }}
+        overflowX="auto" 
+        overflowY="auto"
+        border="1px solid" 
+        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderRadius="md"
+        position="relative"
+        w="100%"
+        maxW="100%"
       >
-        <Box 
-          h={{ base: "70vh", sm: "75vh", md: "100%" }}
-          overflowX="auto" 
-          overflowY="auto"
-          border="1px solid" 
-          borderColor={useColorModeValue('gray.200', 'gray.600')}
-          borderRadius="md"
-          position="relative"
+        <Table 
+          size={{ base: "xs", sm: "sm" }} 
+          variant="simple"
+          w="100%"
+          sx={{ 
+            '& td:first-child, & th:first-child': { position: 'sticky !important', left: 0 },
+            tableLayout: 'auto',
+            width: '100%',
+            minWidth: '100%',
+            marginBottom: 0,
+            '& tbody tr:last-child td': {
+              borderBottom: 'none',
+              paddingBottom: 0
+            },
+            '& tbody': {
+              marginBottom: 0,
+              '& tr:last-child': {
+                marginBottom: 0,
+                '& td': {
+                  paddingBottom: 0,
+                  marginBottom: 0
+                }
+              }
+            }
+          }}
         >
-          <Table 
-            size={{ base: "xs", sm: "sm" }} 
-            variant="simple" 
-            sx={{ 
-              '& td:first-child, & th:first-child': { position: 'sticky !important', left: 0 },
-              tableLayout: 'fixed',
-              width: '100%'
-            }}
-          >
-            <Thead bg={tableHeaderBg} position="sticky" top={0} zIndex={3}>
-              <Tr>
-                {/* Basic Info */}
-                <SortableHeader 
-                  column="protocol" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource=""
-                  fontSize={{ base: "2xs", sm: "xs" }}
-                  position="sticky"
-                  left={0}
-                  bg={tableHeaderBg}
-                  zIndex={4}
-                  borderRight="2px solid"
-                  borderRightColor={useColorModeValue('gray.300', 'gray.600')}
-                  boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-                  minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
-                  maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
-                  w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
-                >
-                  Protocol
-                </SortableHeader>
-                <Th 
-                  fontSize="xs"
-                  textAlign="center"
-                  minW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
-                  maxW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
-                  w={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
-                >
-                  <Text>Links</Text>
-                </Th>
-                <SortableHeader 
-                  column="blockchain" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="Required" 
-                  fontSize="xs"
-                  minW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
-                  maxW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
-                  w={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
-                >
-                  Blockchain
-                </SortableHeader>
-                <SortableHeader 
-                  column="mainnetLaunch" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="docs" 
-                  fontSize="xs"
-                  minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                  maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                  w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                >
-                  V1 Protocol Mainnet
-                </SortableHeader>
-                <SortableHeader 
-                  column="years" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="calc" 
-                  fontSize="xs"
-                  minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                  maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                  w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                >
-                  Years Onchain
-                </SortableHeader>
-                <SortableHeader 
-                  column="status" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="Manual" 
-                  fontSize="xs"
-                  minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-                  maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-                  w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-                >
-                  $OPEN Status
-                </SortableHeader>
-                
-                {/* Market Metrics */}
-                <SortableHeader 
-                  column="marketCap" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs"
-                  minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                  maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                  w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                >
-                  Market Cap
-                </SortableHeader>
-                <SortableHeader 
-                  column="fdv" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs"
-                  minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                  maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                  w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                >
-                  FDV
-                </SortableHeader>
-                <SortableHeader 
-                  column="volume24h" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs"
-                  minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                  maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                  w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                >
-                  Volume (24hr)
-                </SortableHeader>
-                <SortableHeader 
-                  column="volume30d" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs"
-                  minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                >
-                  Volume (30d avg)
-                </SortableHeader>
-                <SortableHeader 
-                  column="tvlCG" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs" 
-                  color="blue.500"
-                  minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                  maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                  w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                >
-                  TVL
-                </SortableHeader>
-                
-                {/* Ratios */}
-                <SortableHeader 
-                  column="mcToFdv" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="calc" 
-                  fontSize="xs"
-                  minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                >
-                  Market Cap / FDV (%)
-                </SortableHeader>
-                <SortableHeader 
-                  column="mcToTvl" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="calc" 
-                  fontSize="xs"
-                  minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                >
-                  Market Cap / TVL (%)
-                </SortableHeader>
-                <SortableHeader 
-                  column="fdvToTvl" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="calc" 
-                  fontSize="xs"
-                  minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                  maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                  w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                >
-                  FDV / TVL (%)
-                </SortableHeader>
-                
-                {/* Supply */}
-                <SortableHeader 
-                  column="maxSupply" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs"
-                  minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                >
-                  Max Supply<br/>(theoretical max)
-                </SortableHeader>
-                <SortableHeader 
-                  column="totalSupply" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs"
-                  minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                >
-                  Total Supply<br/>(onchain supply minus burned)
-                </SortableHeader>
-                <SortableHeader 
-                  column="circSupply" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs"
-                  minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                >
-                  Circ Supply<br/>(public tokens, incl ve)
-                </SortableHeader>
-                <SortableHeader 
-                  column="circToTotal" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="calc" 
-                  fontSize="xs"
-                  minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                  maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                  w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                >
-                  Circ Supply % of Total
-                </SortableHeader>
-                
-                {/* Exchanges */}
-                <Th 
-                  fontSize="xs"
-                  textAlign="center"
-                  minW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
-                  maxW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
-                  w={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Top 3 Exchanges<br/>(24hr combined volume)</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="CoinGecko API" />
-                    </Box>
+          <Thead bg={tableHeaderBg} position="sticky" top={0} zIndex={3}>
+            <Tr>
+              {/* Basic Info */}
+              <SortableHeader 
+                column="protocol" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource=""
+                fontSize={{ base: "2xs", sm: "xs" }}
+                position="sticky"
+                left={0}
+                bg={tableHeaderBg}
+                zIndex={4}
+                borderRight="2px solid"
+                borderRightColor={useColorModeValue('gray.300', 'gray.600')}
+                boxShadow="2px 0 4px rgba(0,0,0,0.1)"
+                minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+                maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+                w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+                textAlign="center"
+                centerVertically={true}
+              >
+                Protocol
+              </SortableHeader>
+              <Th 
+                fontSize="xs"
+                textAlign="center"
+                minW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+                maxW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+                w={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Links</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="External Links" />
                   </Box>
-                </Th>
-                
-                {/* DEX Data */}
-                <Th 
-                  fontSize={{ base: "2xs", sm: "xs" }} 
-                  color="red.600"
-                  textAlign="center"
-                  minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                  maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                  w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Curve TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Curve API" />
-                    </Box>
+                </Box>
+              </Th>
+              <SortableHeader 
+                column="blockchain" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="Required" 
+                fontSize="xs"
+                minW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
+                maxW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
+                w={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
+              >
+                Blockchain
+              </SortableHeader>
+              <SortableHeader 
+                column="mainnetLaunch" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="docs" 
+                fontSize="xs"
+                minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+              >
+                V1 Protocol Mainnet
+              </SortableHeader>
+              <SortableHeader 
+                column="years" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="calc" 
+                fontSize="xs"
+                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+              >
+                Years Onchain
+              </SortableHeader>
+              <SortableHeader 
+                column="status" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="Manual" 
+                fontSize="xs"
+                minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+              >
+                $OPEN Status
+              </SortableHeader>
+              
+              {/* Market Metrics */}
+              <SortableHeader 
+                column="marketCap" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs"
+                minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+              >
+                Market Cap
+              </SortableHeader>
+              <SortableHeader 
+                column="fdv" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs"
+                minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+              >
+                FDV
+              </SortableHeader>
+              <SortableHeader 
+                column="volume24h" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs"
+                minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+              >
+                Volume (24hr)
+              </SortableHeader>
+              <SortableHeader 
+                column="volume30d" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs"
+                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+              >
+                Volume (30d avg)
+              </SortableHeader>
+              <SortableHeader 
+                column="tvlCG" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs" 
+                color="blue.500"
+                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+              >
+                TVL
+              </SortableHeader>
+              
+              {/* Ratios */}
+              <SortableHeader 
+                column="mcToFdv" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="calc" 
+                fontSize="xs"
+                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+              >
+                Market Cap / FDV (%)
+              </SortableHeader>
+              <SortableHeader 
+                column="mcToTvl" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="calc" 
+                fontSize="xs"
+                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+              >
+                Market Cap / TVL (%)
+              </SortableHeader>
+              <SortableHeader 
+                column="fdvToTvl" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="calc" 
+                fontSize="xs"
+                minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+              >
+                FDV / TVL (%)
+              </SortableHeader>
+              
+              {/* Supply */}
+              <SortableHeader 
+                column="maxSupply" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs"
+                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+              >
+                Max Supply<br/>(theoretical max)
+              </SortableHeader>
+              <SortableHeader 
+                column="totalSupply" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs"
+                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+              >
+                Total Supply<br/>(onchain supply minus burned)
+              </SortableHeader>
+              <SortableHeader 
+                column="circSupply" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="CoinGecko API" 
+                fontSize="xs"
+                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+              >
+                Circ Supply<br/>(public tokens, incl ve)
+              </SortableHeader>
+              <SortableHeader 
+                column="circToTotal" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="calc" 
+                fontSize="xs"
+                minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+              >
+                Circ Supply % of Total
+              </SortableHeader>
+              
+              {/* Exchanges */}
+              <Th 
+                fontSize="xs"
+                textAlign="center"
+                minW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
+                maxW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
+                w={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Top 3 Exchanges<br/>(24hr combined volume)</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="CoinGecko API" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="red.600"
-                  textAlign="center"
-                  minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                  maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                  w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Curve 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Curve API" />
-                    </Box>
+                </Box>
+              </Th>
+              
+              {/* DEX Data */}
+              <Th 
+                fontSize={{ base: "2xs", sm: "xs" }} 
+                color="red.600"
+                textAlign="center"
+                minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+                w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Curve TVL</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Curve API" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="orange.600"
-                  textAlign="center"
-                  minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                  maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                  w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Uniswap TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Uniswap Subgraph" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="red.600"
+                textAlign="center"
+                minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Curve 24hr Vol</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Curve API" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="orange.600"
-                  textAlign="center"
-                  minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                  maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                  w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Uniswap 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Uniswap Subgraph" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="orange.600"
+                textAlign="center"
+                minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Uniswap TVL</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Uniswap Subgraph" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="green.600"
-                  textAlign="center"
-                  minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                  maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                  w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Balancer TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="orange.600"
+                textAlign="center"
+                minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Uniswap 24hr Vol</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Uniswap Subgraph" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="green.600"
-                  textAlign="center"
-                  minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                  maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                  w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Balancer 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="green.600"
+                textAlign="center"
+                minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Balancer TVL</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="purple.600"
-                  textAlign="center"
-                  minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                  maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                  w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Sushi TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Sushiswap Subgraph" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="green.600"
+                textAlign="center"
+                minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Balancer 24hr Vol</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="purple.600"
-                  textAlign="center"
-                  minW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
-                  maxW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
-                  w={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Sushi 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Sushiswap Subgraph" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="purple.600"
+                textAlign="center"
+                minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+                w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Sushi TVL</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Sushiswap Subgraph" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="blue.600" 
-                  fontWeight="bold"
-                  textAlign="center"
-                  minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                  maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                  w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Mainnet DEX TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="calc" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="purple.600"
+                textAlign="center"
+                minW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
+                maxW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
+                w={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Sushi 24hr Vol</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="Sushiswap Subgraph" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs" 
-                  color="blue.600"
-                  textAlign="center"
-                  minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>24hr DEX volume</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="calc" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="blue.600" 
+                fontWeight="bold"
+                textAlign="center"
+                minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Mainnet DEX TVL</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="calc" />
                   </Box>
-                </Th>
-                <Th 
-                  fontSize="xs"
-                  textAlign="center"
-                  minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                  w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>DEX Liquidity Turnover</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="calc" />
-                    </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs" 
+                color="blue.600"
+                textAlign="center"
+                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>24hr DEX volume</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="calc" />
                   </Box>
-                </Th>
-                
-                {/* Emissions */}
-                <SortableHeader 
-                  textAlign="center"
-                  column="nextEmissions" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="Protocol team" 
-                  fontSize="xs" 
-                  minW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
-                  maxW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
-                  w={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
-                >
-                  Next 12 mo Emissions / Unlocks
-                </SortableHeader>
-                <SortableHeader 
-                  textAlign="center"
-                  column="nextReleasePercentage" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="Protocol team" 
-                  fontSize="xs" 
-                  minW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
-                  maxW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
-                  w={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
-                >
-                  Next 12 month release %
-                </SortableHeader>
-                <SortableHeader 
-                  textAlign="center"
-                  column="emissionsCatalyst" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="Protocol team" 
-                  fontSize="xs" 
-                  minW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
-                  maxW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
-                  w={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
-                >
-                  Emissions, unlocks catalyst
-                </SortableHeader>
-                
-                {/* Protocol TVL */}
-                <SortableHeader 
-                  column="protocolTVL" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="DeFiLlama API" 
-                  fontSize="xs"
-                  minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                  w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                >
-                  Protocol TVL<br/>(exclude staking)
-                </SortableHeader>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {sortedProtocols.map((protocol) => (
-                <ProtocolRow
-                  key={protocol.ticker}
-                  protocol={protocol}
-                  shouldLoad={loadedProtocols.has(protocol.originalIndex)}
-                />
-              ))}
-            </Tbody>
-          </Table>
-        </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs"
+                textAlign="center"
+                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>DEX Liquidity Turnover</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="calc" />
+                  </Box>
+                </Box>
+              </Th>
+              
+              {/* Emissions */}
+              <SortableHeader 
+                textAlign="center"
+                column="nextEmissions" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="Protocol team" 
+                fontSize="xs" 
+                minW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
+                maxW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
+                w={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
+              >
+                Next 12 mo Emissions / Unlocks
+              </SortableHeader>
+              <SortableHeader 
+                textAlign="center"
+                column="nextReleasePercentage" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="Protocol team" 
+                fontSize="xs" 
+                minW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
+                maxW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
+                w={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
+              >
+                Next 12 month release %
+              </SortableHeader>
+              <SortableHeader 
+                textAlign="center"
+                column="emissionsCatalyst" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="Protocol team" 
+                fontSize="xs" 
+                minW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
+                maxW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
+                w={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
+              >
+                Emissions, unlocks catalyst
+              </SortableHeader>
+              
+              {/* Protocol TVL */}
+              <SortableHeader 
+                column="protocolTVL" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="DeFiLlama API" 
+                fontSize="xs"
+                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+              >
+                Protocol TVL<br/>(exclude staking)
+              </SortableHeader>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {sortedProtocols.map((protocol) => (
+              <ProtocolRow
+                key={protocol.ticker}
+                protocol={protocol}
+                shouldLoad={loadedProtocols.has(protocol.originalIndex)}
+              />
+            ))}
+          </Tbody>
+        </Table>
       </Box>
     </Box>
   );
