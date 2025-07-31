@@ -1001,8 +1001,8 @@ export default function DeFiDashboard() {
                 {/* Exchanges */}
                 <Th 
                   fontSize="xs"
-                  minW="320px"
-                  maxW="400px"
+                  minW="350px"
+                  w="350px"
                 >
                   <VStack spacing={1} align="start" >
                     <HStack spacing={1}>
@@ -1103,9 +1103,9 @@ export default function DeFiDashboard() {
                 </Th>
                 
                 {/* Emissions */}
-                <SortableHeader column="nextEmissions" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" >Next 12 mo Emissions / Unlocks</SortableHeader>
-                <SortableHeader column="nextReleasePercentage" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" >Next 12 month release %</SortableHeader>
-                <SortableHeader column="emissionsCatalyst" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" minW="250px" maxW="350px">Emissions, unlocks catalyst</SortableHeader>
+                <SortableHeader column="nextEmissions" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" minW="180px" w="180px">Next 12 mo Emissions / Unlocks</SortableHeader>
+                <SortableHeader column="nextReleasePercentage" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" minW="150px" w="150px">Next 12 month release %</SortableHeader>
+                <SortableHeader column="emissionsCatalyst" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" minW="300px" w="300px">Emissions, unlocks catalyst</SortableHeader>
                 
                 {/* Protocol TVL */}
                 <SortableHeader column="protocolTVL" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="DeFiLlama API" fontSize="xs">Protocol TVL<br/>(exclude staking)</SortableHeader>
