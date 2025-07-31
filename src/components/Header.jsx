@@ -50,8 +50,8 @@ export default function Header() {
       maxW="100vw"
       overflow="hidden"
     >
-      <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 3, md: 4 }}>
-        <Flex justify="space-between" align="center" minH={{ base: "50px", md: "60px" }}>
+      <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 1, md: 2 }}>
+        <Flex justify="space-between" align="center" minH={{ base: "35px", md: "40px" }}>
           <HStack spacing={{ base: 2, md: 4 }} flex="1" mr={{ base: 2, md: 4 }}>
             <Image 
               src="/logo.svg" 

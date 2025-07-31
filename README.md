@@ -199,29 +199,117 @@ if (protocol.ticker === 'MYTOKEN') {
 
 ## 🐳 Docker Deployment
 
-### Quick Deploy with Docker
+The Open Dashboard provides separate Docker configurations for development and production environments.
+
+### 🛠️ Development Environment
+
+For local development with external Redis and API proxy:
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d
+# Option 1: Use helper script (recommended)
+./scripts/dev.sh
 
-# Or build manually
-docker build -t open-dashboard .
-docker run -p 80:80 open-dashboard
+# Option 2: Manual setup
+docker-compose -f docker-compose.dev.yml up -d --build
 ```
 
-### Environment Variables
+**Development Environment Features:**
+- Uses `Dockerfile.dev` and `nginx.dev.conf`
+- Nginx proxy routes API calls to cache-service
+- External Redis connection
+- Accessible at: http://localhost:3000
+- API Health: http://localhost:3000/api/health
 
-Create a `.env` file for configuration:
+### 🚀 Production Environment
+
+For production deployment (e.g., Digital Ocean App Platform):
+
+```bash
+# Option 1: Use helper script (recommended)
+./scripts/prod.sh
+
+# Option 2: Manual setup
+docker-compose up -d --build
+```
+
+**Production Environment Features:**
+- Uses `Dockerfile` and `nginx.conf`
+- API routing handled by platform (Digital Ocean App Platform)
+- External Redis connection
+- Optimized for production deployment
+
+### 📋 Environment Variables
+
+Create a `.env` file in the root directory:
 
 ```env
-# API Keys (optional for rate limiting)
-VITE_COINGECKO_API_KEY=your_api_key
-VITE_DEFILLAMA_API_KEY=your_api_key
+# Cache Service Configuration
+PORT=4000
+REDIS_URL=redis://your-redis-host:6379
 
-# Cache Configuration
-VITE_CACHE_TTL=300000  # 5 minutes
-VITE_API_BASE_URL=http://localhost:3001
+# API Keys (secure backend-only)
+COINGECKO_API_KEY=your_coingecko_api_key
+THE_GRAPH_API_KEY=your_thegraph_api_key
+
+# Ethereum RPC URLs
+ETH_RPC_URL=https://mainnet.infura.io/v3/your_key
+ETH_RPC_URL_FALLBACK=https://rpc.ankr.com/eth
+
+# The Graph Subgraph IDs
+UNISWAP_V3_SUBGRAPH_ID=5zvR82QoaXuFYDNKBfRU5N3q
+UNISWAP_V2_SUBGRAPH_ID=ELUcwgpm14LKPLrBRuVvPvNKHQ9HvwmtKgKSH6123456
+SUSHI_SUBGRAPH_ID=4bb7e6e1-b60d-4e1e-9f0d-123456789abc
+SUSHI_V2_SUBGRAPH_ID=0x4bb7e6e1-b60d-4e1e-9f0d-123456789abc
+CURVE_SUBGRAPH_ID=3C5-qE3-wVf-6Pw-dS2-aB8-x9K-mN4
+FRAXSWAP_SUBGRAPH_ID=8H2-nF9-sW3-7Qs-eR5-cD6-y1L-mK8
+BALANCER_V2_SUBGRAPH_ID=C4ayEZP2yTXRAB8Tf0h8bKaLqr
+```
+
+### 🔧 Service Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │  Cache Service  │    │  External APIs  │
+│   (React/Vite)  │◄──►│   (Node.js)     │◄──►│   (CoinGecko,   │
+│   Port: 3000    │    │   Port: 4000    │    │   DeFiLlama,    │
+└─────────────────┘    └─────────────────┘    │   The Graph)    │
+         │                       │             └─────────────────┘
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐
+│     Nginx       │    │      Redis      │
+│   (Proxy/CDN)   │    │     (Cache)     │
+└─────────────────┘    └─────────────────┘
+```
+
+### 📊 Health Checks
+
+Monitor your deployment:
+
+```bash
+# Check application status
+curl http://localhost:3000/api/health
+
+# Check Redis connection
+curl http://localhost:3000/api/admin/redis-info
+
+# View container logs
+docker-compose logs -f app
+docker-compose logs -f cache-service
+```
+
+### 🔄 Updating Deployment
+
+```bash
+# Pull latest changes
+git pull origin main
+
+# Rebuild and restart (development)
+docker-compose -f docker-compose.dev.yml down
+./scripts/dev.sh
+
+# Rebuild and restart (production)
+docker-compose down
+./scripts/prod.sh
 ```
 
 ## 🔄 Data Flow

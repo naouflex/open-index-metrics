@@ -352,9 +352,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       
       {/* Links */}
       <Td 
-        minW={{ base: "120px", sm: "130px", md: "140px", lg: "150px" }}
-        maxW={{ base: "120px", sm: "130px", md: "140px", lg: "150px" }}
-        w={{ base: "120px", sm: "130px", md: "140px", lg: "150px" }}
+        minW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+        maxW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+        w={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
       >
         <HStack spacing={2} wrap="wrap" justify="center" align="center">
           {protocol.govContractAddress && (
@@ -1280,9 +1280,9 @@ export default function DeFiDashboard() {
                 <Th 
                   fontSize="xs"
                   textAlign="center"
-                  minW={{ base: "120px", sm: "130px", md: "140px", lg: "150px" }}
-                  maxW={{ base: "120px", sm: "130px", md: "140px", lg: "150px" }}
-                  w={{ base: "120px", sm: "130px", md: "140px", lg: "150px" }}
+                  minW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+                  maxW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+                  w={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
                 >
                   <Text>Links</Text>
                 </Th>

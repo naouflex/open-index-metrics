@@ -23,8 +23,8 @@ export default function Footer() {
       maxW="100vw"
       overflow="hidden"
     >
-      <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 3, md: 4 }}>
-        <VStack spacing={{ base: 2, md: 3 }} align="center">
+      <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 1, md: 2 }}>
+        <VStack spacing={{ base: 0.5, md: 1 }} align="center">
           <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500" textAlign="center">
             Data sources: CoinGecko, DeFiLlama, The Graph Protocol, Curve API
           </Text>
