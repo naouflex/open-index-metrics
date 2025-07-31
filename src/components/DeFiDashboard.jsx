@@ -177,9 +177,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           borderRight="2px solid"
           borderRightColor={useColorModeValue('gray.300', 'gray.600')}
           boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-          minW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
-          maxW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
-          w={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+          minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+          maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+          w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
         >
           {protocol.ticker}
         </Td>
@@ -276,9 +276,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           borderRight="2px solid"
           borderRightColor={useColorModeValue('gray.300', 'gray.600')}
           boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-          minW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
-          maxW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
-          w={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+          minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+          maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+          w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
         >
           {protocol.ticker}
         </Td>
@@ -315,6 +315,9 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
           boxShadow="2px 0 4px rgba(0,0,0,0.1)"
           _hover={{ bg: hoverBgColor }}
         whiteSpace="nowrap"
+        minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+        maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+        w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
       >
         <VStack align="start" spacing={{ base: 0, md: 2 }}>
           <VStack align="start" spacing={0}>
@@ -333,7 +336,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       </Td>
       
       {/* Links */}
-      <Td minW="120px" maxW="180px">
+      <Td minW={{ base: "85px", sm: "100px", md: "120px" }} maxW={{ base: "85px", sm: "100px", md: "140px" }}>
         <VStack spacing={1} align="start">
           {protocol.govContractAddress && (
             <Link href={`https://etherscan.io/address/${protocol.govContractAddress}`} isExternal>
@@ -342,12 +345,15 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
                 size="xs"
                 cursor="pointer" 
                 _hover={{ bg: 'blue.600', color: 'white' }}
-                fontSize="8px"
+                fontSize={{ base: "7px", sm: "8px" }}
                 px={1}
                 py={0.5}
+                display="flex"
+                alignItems="center"
+                gap={1}
               >
                 Etherscan
-                <ExternalLinkIcon boxSize={2} ml={1} />
+                <ExternalLinkIcon boxSize={{ base: 1.5, sm: 2 }} />
               </Badge>
             </Link>
           )}
@@ -358,12 +364,15 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
                 size="xs"
                 cursor="pointer" 
                 _hover={{ bg: 'green.600', color: 'white' }}
-                fontSize="8px"
+                fontSize={{ base: "7px", sm: "8px" }}
                 px={1}
                 py={0.5}
+                display="flex"
+                alignItems="center"
+                gap={1}
               >
                 CoinGecko
-                <ExternalLinkIcon boxSize={2} ml={1} />
+                <ExternalLinkIcon boxSize={{ base: 1.5, sm: 2 }} />
               </Badge>
             </Link>
           )}
@@ -374,12 +383,15 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
                 size="xs"
                 cursor="pointer" 
                 _hover={{ bg: 'purple.600', color: 'white' }}
-                fontSize="8px"
+                fontSize={{ base: "7px", sm: "8px" }}
                 px={1}
                 py={0.5}
+                display="flex"
+                alignItems="center"
+                gap={1}
               >
                 DeFiLlama
-                <ExternalLinkIcon boxSize={2} ml={1} />
+                <ExternalLinkIcon boxSize={{ base: 1.5, sm: 2 }} />
               </Badge>
             </Link>
           )}
@@ -504,7 +516,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       </Td>
       
               {/* Top 3 Exchanges */}
-        <Td>
+        <Td minW="320px" maxW="400px">
           <Skeleton isLoaded={!coinGeckoData.topExchanges?.isLoading}>
             <Text fontSize="xs" color="gray.600">
               {(() => {
@@ -614,11 +626,11 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       </Td>
       
       {/* Emissions */}
-      <Td>
+      <Td minW="180px">
         <Text fontSize="sm">{formatSupply(protocol.nextEmissions)}</Text>
       </Td>
       
-      <Td>
+      <Td minW="150px">
         <Text 
           fontSize="sm" 
           color={getColorForMetric(nextReleasePercentage * 100, 'nextReleasePercentage', colorMode)}
@@ -629,7 +641,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       </Td>
       
       {/* Emissions Catalyst */}
-      <Td>
+      <Td minW="250px" maxW="350px">
         <Text fontSize="xs" color="gray.600">{protocol.emissionsCatalyst || 'N/A'}</Text>
       </Td>
       
@@ -945,16 +957,16 @@ export default function DeFiDashboard() {
                   borderRight="2px solid"
                   borderRightColor={useColorModeValue('gray.300', 'gray.600')}
                   boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-                  minW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
-                  maxW={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
-                  w={{ base: "80px", sm: "150px", md: "200px", lg: "250px" }}
+                  minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+                  maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+                  w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
                 >
                   Protocol
                 </SortableHeader>
                 <Th 
                   fontSize="xs"
-                  minW="120px"
-                  maxW="180px"
+                  minW={{ base: "85px", sm: "100px", md: "120px" }}
+                  maxW={{ base: "85px", sm: "100px", md: "140px" }}
                 >
                   <VStack spacing={1} align="start">
                     <HStack spacing={1}>
@@ -989,9 +1001,10 @@ export default function DeFiDashboard() {
                 {/* Exchanges */}
                 <Th 
                   fontSize="xs"
-                  minW="240px"
+                  minW="320px"
+                  maxW="400px"
                 >
-                  <VStack spacing={1} align="start">
+                  <VStack spacing={1} align="start" >
                     <HStack spacing={1}>
                       <Text>Top 3 Exchanges<br/>(24hr combined volume)</Text>
                       <DataSourceBadge source="CoinGecko API" />
@@ -1090,9 +1103,9 @@ export default function DeFiDashboard() {
                 </Th>
                 
                 {/* Emissions */}
-                <SortableHeader column="nextEmissions" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs">Next 12 mo Emissions / Unlocks</SortableHeader>
-                <SortableHeader column="nextReleasePercentage" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs">Next 12 month release %</SortableHeader>
-                <SortableHeader column="emissionsCatalyst" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs">Emissions, unlocks catalyst</SortableHeader>
+                <SortableHeader column="nextEmissions" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" >Next 12 mo Emissions / Unlocks</SortableHeader>
+                <SortableHeader column="nextReleasePercentage" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" >Next 12 month release %</SortableHeader>
+                <SortableHeader column="emissionsCatalyst" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Protocol team" fontSize="xs" minW="250px" maxW="350px">Emissions, unlocks catalyst</SortableHeader>
                 
                 {/* Protocol TVL */}
                 <SortableHeader column="protocolTVL" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="DeFiLlama API" fontSize="xs">Protocol TVL<br/>(exclude staking)</SortableHeader>
