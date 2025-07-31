@@ -457,11 +457,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Supply Metrics */}
       <Td>
         <Skeleton isLoaded={!isLoading}>
-          <Text fontSize="sm">{
-            protocol.ticker === 'FXN' 
-              ? formatNumber(maxSupply) // Use currency formatting for FXN USD values
-              : formatSupply(maxSupply) // Use supply formatting for other protocols
-          }</Text>
+          <Text fontSize="sm">{formatSupply(maxSupply)}</Text>
         </Skeleton>
       </Td>
       
