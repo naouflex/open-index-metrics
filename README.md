@@ -1,6 +1,6 @@
 # Open Dashboard - DeFi Protocol Analytics
 
-![Open Source](https://img.shields.io/badge/Open%20Source-Yes-green) ![License](https://img.shields.io/badge/license-MIT-blue) ![React](https://img.shields.io/badge/React-18.0+-61DAFB) ![Vite](https://img.shields.io/badge/Vite-5.0+-646CFF)
+ ![React](https://img.shields.io/badge/React-19.1.1-61DAFB) ![Vite](https://img.shields.io/badge/Vite-7.0.6-646CFF) ![Docker](https://img.shields.io/badge/Docker-28.2.2-2496ED) ![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2.36.2-2496ED)
 
 **Open Dashboard** is a fully **open source** DeFi analytics platform that aggregates real-time data from multiple blockchain data sources to provide comprehensive protocol metrics. Teams can easily fork, customize, and deploy their own version with their preferred protocols and metrics.
 
@@ -401,8 +401,8 @@ We welcome contributions! This project thrives on community involvement:
 
 ## 🆘 Support & Community
 
-- **Issues**: [GitHub Issues](https://github.com/your-username/open-dashboard/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/open-dashboard/discussions)
+- **Issues**: [GitHub Issues](https://github.com/naouflex/open-index-metrics/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/naouflex/open-index-metrics/discussions)
 - **Documentation**: This README and inline code comments
 - **Examples**: Check the `examples/` directory for common customizations
 
