@@ -18,7 +18,16 @@ import {
   AlertTitle,
   AlertDescription,
   Icon,
-  Link
+  Link,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  useDisclosure
 } from '@chakra-ui/react';
 
 import { AlertIcon, TriangleUpIcon, TriangleDownIcon, ExternalLinkIcon, InfoIcon } from '@chakra-ui/icons';
@@ -174,7 +183,10 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
         >
           {protocol.ticker}
         </Td>
-        <Td colSpan={30}>
+        <Td>
+          <Skeleton height="20px" width="80px" />
+        </Td>
+        <Td colSpan={29}>
           <Skeleton height="20px" />
         </Td>
       </Tr>
@@ -270,7 +282,10 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
         >
           {protocol.ticker}
         </Td>
-        <Td colSpan={30}>
+        <Td>
+          <Text fontSize="xs" color="gray.500">N/A</Text>
+        </Td>
+        <Td colSpan={29}>
           <Alert status="error" size="sm">
             <AlertIcon />
             <AlertTitle>Error loading data</AlertTitle>
@@ -313,56 +328,61 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
               {protocol.name}
             </Text>
           </VStack>
-          <HStack spacing={1} flexWrap="wrap" display={{ base: "none", sm: "flex" }}>
-            {protocol.govContractAddress && (
-              <Link href={`https://etherscan.io/address/${protocol.govContractAddress}`} isExternal>
-                <Badge 
-                  colorScheme="blue" 
-                  size={{ base: "xs", sm: "sm" }}
-                  cursor="pointer" 
-                  _hover={{ bg: 'blue.600', color: 'white' }}
-                  display={{ base: "none", sm: "flex" }}
-                  alignItems="center"
-                  gap={1}
-                >
-                  Etherscan
-                  <ExternalLinkIcon boxSize={2} />
-                </Badge>
-              </Link>
-            )}
-            {protocol.coingeckoId && (
-              <Link href={`https://www.coingecko.com/en/coins/${protocol.coingeckoId}`} isExternal>
-                <Badge 
-                  colorScheme="green" 
-                  size={{ base: "xs", sm: "sm" }}
-                  cursor="pointer" 
-                  _hover={{ bg: 'green.600', color: 'white' }}
-                  display={{ base: "none", sm: "flex" }}
-                  alignItems="center"
-                  gap={1}
-                >
-                  CoinGecko
-                  <ExternalLinkIcon boxSize={2} />
-                </Badge>
-              </Link>
-            )}
-            {protocol.defiLlamaSlug && (
-              <Link href={`https://defillama.com/protocol/${protocol.defiLlamaSlug}`} isExternal>
-                <Badge 
-                  colorScheme="purple" 
-                  size={{ base: "xs", sm: "sm" }}
-                  cursor="pointer" 
-                  _hover={{ bg: 'purple.600', color: 'white' }}
-                  display={{ base: "none", sm: "flex" }}
-                  alignItems="center"
-                  gap={1}
-                >
-                  DeFiLlama
-                  <ExternalLinkIcon boxSize={2} />
-                </Badge>
-              </Link>
-            )}
-          </HStack>
+
+        </VStack>
+      </Td>
+      
+      {/* Links */}
+      <Td minW="120px" maxW="180px">
+        <VStack spacing={1} align="start">
+          {protocol.govContractAddress && (
+            <Link href={`https://etherscan.io/address/${protocol.govContractAddress}`} isExternal>
+              <Badge 
+                colorScheme="blue" 
+                size="xs"
+                cursor="pointer" 
+                _hover={{ bg: 'blue.600', color: 'white' }}
+                fontSize="8px"
+                px={1}
+                py={0.5}
+              >
+                Etherscan
+                <ExternalLinkIcon boxSize={2} ml={1} />
+              </Badge>
+            </Link>
+          )}
+          {protocol.coingeckoId && (
+            <Link href={`https://www.coingecko.com/en/coins/${protocol.coingeckoId}`} isExternal>
+              <Badge 
+                colorScheme="green" 
+                size="xs"
+                cursor="pointer" 
+                _hover={{ bg: 'green.600', color: 'white' }}
+                fontSize="8px"
+                px={1}
+                py={0.5}
+              >
+                CoinGecko
+                <ExternalLinkIcon boxSize={2} ml={1} />
+              </Badge>
+            </Link>
+          )}
+          {protocol.defiLlamaSlug && (
+            <Link href={`https://defillama.com/protocol/${protocol.defiLlamaSlug}`} isExternal>
+              <Badge 
+                colorScheme="purple" 
+                size="xs"
+                cursor="pointer" 
+                _hover={{ bg: 'purple.600', color: 'white' }}
+                fontSize="8px"
+                px={1}
+                py={0.5}
+              >
+                DeFiLlama
+                <ExternalLinkIcon boxSize={2} ml={1} />
+              </Badge>
+            </Link>
+          )}
         </VStack>
       </Td>
       
@@ -627,6 +647,8 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
 // ================= DATA SOURCE BADGE COMPONENT =================
 
 function DataSourceBadge({ source }) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  
   if (!source) return null;
   
   const getColorScheme = (source) => {
@@ -640,7 +662,25 @@ function DataSourceBadge({ source }) {
   };
 
   return (
-    <Tooltip label={`Data Source: ${source}`} hasArrow placement="top">
+    <>
+      {/* Desktop: Show tooltip on hover */}
+      <Tooltip label={`Data Source: ${source}`} hasArrow placement="top" display={{ base: "none", md: "block" }}>
+        <Badge 
+          colorScheme={getColorScheme(source)} 
+          size="xs" 
+          fontSize="8px"
+          px={1}
+          py={0.5}
+          ml={1}
+          cursor="help"
+          display={{ base: "none", md: "flex" }}
+          alignItems="center"
+        >
+          <InfoIcon boxSize={2} />
+        </Badge>
+      </Tooltip>
+      
+      {/* Mobile: Show clickable badge that opens modal */}
       <Badge 
         colorScheme={getColorScheme(source)} 
         size="xs" 
@@ -648,11 +688,29 @@ function DataSourceBadge({ source }) {
         px={1}
         py={0.5}
         ml={1}
-        cursor="help"
+        cursor="pointer"
+        display={{ base: "flex", md: "none" }}
+        alignItems="center"
+        onClick={onOpen}
       >
         <InfoIcon boxSize={2} />
       </Badge>
-    </Tooltip>
+      
+      {/* Modal for mobile */}
+      <Modal isOpen={isOpen} onClose={onClose} size="sm">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader fontSize="lg">Data Source</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>{source}</Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={onClose} size="sm">Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
 
@@ -893,6 +951,18 @@ export default function DeFiDashboard() {
                 >
                   Protocol
                 </SortableHeader>
+                <Th 
+                  fontSize="xs"
+                  minW="120px"
+                  maxW="180px"
+                >
+                  <VStack spacing={1} align="start">
+                    <HStack spacing={1}>
+                      <Text>Links</Text>
+                      <DataSourceBadge source="External Links" />
+                    </HStack>
+                  </VStack>
+                </Th>
                 <SortableHeader column="blockchain" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="Required" fontSize="xs">Blockchain</SortableHeader>
                 <SortableHeader column="mainnetLaunch" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="docs" fontSize="xs">V1 Protocol Mainnet</SortableHeader>
                 <SortableHeader column="years" currentSort={sortConfig} onSort={handleSort} onReset={handleReset} dataSource="calc" fontSize="xs">Years Onchain</SortableHeader>

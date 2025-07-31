@@ -8,7 +8,7 @@ export const protocols = [
     coingeckoId: "fxn-token",
     defiLlamaSlug: "fx-protocol",
     blockchain: "ethereum",
-    mainnetLaunch: "2023-03-01",
+    mainnetLaunch: "2023-08-01",
     openStatus: "proposed",
     nextEmissions: 44100,
     emissionsCatalyst: "Gauge emissions"
