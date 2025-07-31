@@ -1,17 +1,45 @@
 import axios from 'axios';
+import { RequestQueue, generateCacheKey } from './request-queue.js';
 
 export class DefiLlamaFetcher {
   constructor() {
     this.baseUrl = 'https://api.llama.fi';
     this.priceUrl = 'https://coins.llama.fi'; // Separate URL for price endpoints
+    
+    // Initialize request queue with conservative rate limits for DefiLlama
+    this.requestQueue = new RequestQueue({
+      concurrency: 2, // Max 2 concurrent requests
+      requestsPerSecond: 3, // Conservative rate limit (3 requests per second)
+      retryAttempts: 3,
+      baseDelay: 2000, // Start with 2s delay
+      maxDelay: 60000, // Max 1 minute delay
+      circuitThreshold: 3, // Open circuit after 3 failures
+      circuitTimeout: 120000 // 2 minutes timeout
+    });
+    
+    // Batch processing for token prices
+    this.tokenPriceBatch = new Map();
+    this.batchProcessTimer = null;
+    this.batchDelay = 500; // 500ms delay before processing batch
+    
+    console.log('DefiLlamaFetcher initialized with rate limiting');
   }
 
   async fetchProtocolTVL(protocolSlug) {
-    try {
+    const requestKey = generateCacheKey('defillama', 'protocol-tvl', { slug: protocolSlug });
+    
+    return this.requestQueue.enqueue(requestKey, async () => {
       const url = `${this.baseUrl}/protocol/${protocolSlug}`;
       console.log(`Fetching DeFiLlama TVL for: ${protocolSlug}`);
       
-      const response = await axios.get(url, { timeout: 8000 });
+      const response = await axios.get(url, { 
+        timeout: 10000, // Increased timeout for better reliability
+        headers: {
+          'User-Agent': 'OpenDashboard/1.0',
+          'Accept': 'application/json'
+        }
+      });
+      
       const tvlData = response.data;
       
       // Get the current TVL from the latest entry in the historical data
@@ -29,7 +57,7 @@ export class DefiLlamaFetcher {
         currentTvl = tvlData.currentChainTvls.Ethereum;
       }
 
-      return {
+      const result = {
         protocol: protocolSlug,
         name: tvlData.name || protocolSlug,
         symbol: tvlData.symbol || '',
@@ -42,29 +70,44 @@ export class DefiLlamaFetcher {
         mcap: tvlData.mcap || null,
         fetched_at: new Date().toISOString()
       };
-    } catch (error) {
+      
+      console.log(`Successfully fetched TVL for ${protocolSlug}: $${currentTvl.toLocaleString()}`);
+      return result;
+    }).catch(error => {
       console.error(`Error fetching DeFiLlama TVL for ${protocolSlug}:`, error.message);
       return {
         protocol: protocolSlug,
         tvl: 0,
-        error: 'Failed to fetch data',
+        error: error.message,
         fetched_at: new Date().toISOString()
       };
-    }
+    });
   }
 
   async fetchTokenPrice(tokenAddress, chain = 'ethereum') {
-    try {
+    const requestKey = generateCacheKey('defillama', 'token-price', { 
+      address: tokenAddress.toLowerCase(), 
+      chain 
+    });
+    
+    return this.requestQueue.enqueue(requestKey, async () => {
       const url = `${this.priceUrl}/prices/current/${chain}:${tokenAddress.toLowerCase()}`;
-      console.log(`Fetching token price for: ${chain}:${tokenAddress} from ${url}`);
+      console.log(`Fetching token price for: ${chain}:${tokenAddress}`);
       
-      const response = await axios.get(url, { timeout: 8000 });
+      const response = await axios.get(url, { 
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'OpenDashboard/1.0',
+          'Accept': 'application/json'
+        }
+      });
+      
       const priceData = response.data;
-      
       const tokenKey = `${chain}:${tokenAddress.toLowerCase()}`;
+      
       if (priceData.coins && priceData.coins[tokenKey]) {
         const coinData = priceData.coins[tokenKey];
-        return {
+        const result = {
           address: tokenAddress,
           chain: chain,
           price: coinData.price,
@@ -73,6 +116,9 @@ export class DefiLlamaFetcher {
           timestamp: coinData.timestamp,
           fetched_at: new Date().toISOString()
         };
+        
+        console.log(`Price fetched for ${tokenKey}: $${coinData.price}`);
+        return result;
       }
 
       return {
@@ -82,26 +128,119 @@ export class DefiLlamaFetcher {
         error: 'Price not found',
         fetched_at: new Date().toISOString()
       };
-    } catch (error) {
+    }).catch(error => {
       console.error(`Error fetching token price for ${chain}:${tokenAddress}:`, error.message);
       return {
         address: tokenAddress,
         chain: chain,
         price: null,
-        error: 'Failed to fetch price',
+        error: error.message,
         fetched_at: new Date().toISOString()
       };
+    });
+  }
+
+  /**
+   * Batch fetch multiple token prices in a single request (more efficient)
+   */
+  async fetchMultipleTokenPrices(tokenRequests) {
+    if (!Array.isArray(tokenRequests) || tokenRequests.length === 0) {
+      return {};
     }
+
+    // Group by chain for batch requests
+    const chainGroups = tokenRequests.reduce((groups, { tokenAddress, chain = 'ethereum' }) => {
+      if (!groups[chain]) groups[chain] = [];
+      groups[chain].push(tokenAddress.toLowerCase());
+      return groups;
+    }, {});
+
+    const results = {};
+    
+    // Process each chain group
+    for (const [chain, addresses] of Object.entries(chainGroups)) {
+      const batchKey = generateCacheKey('defillama', 'batch-prices', { 
+        chain, 
+        addresses: addresses.sort() 
+      });
+      
+      try {
+        const batchResult = await this.requestQueue.enqueue(batchKey, async () => {
+          const addressString = addresses.map(addr => `${chain}:${addr}`).join(',');
+          const url = `${this.priceUrl}/prices/current/${addressString}`;
+          
+          console.log(`Batch fetching ${addresses.length} token prices for ${chain}`);
+          
+          const response = await axios.get(url, { 
+            timeout: 15000, // Longer timeout for batch requests
+            headers: {
+              'User-Agent': 'OpenDashboard/1.0',
+              'Accept': 'application/json'
+            }
+          });
+          
+          return response.data;
+        });
+
+        // Process batch results
+        if (batchResult.coins) {
+          for (const address of addresses) {
+            const tokenKey = `${chain}:${address}`;
+            const coinData = batchResult.coins[tokenKey];
+            
+            results[tokenKey] = coinData ? {
+              address: address,
+              chain: chain,
+              price: coinData.price,
+              symbol: coinData.symbol || '',
+              decimals: coinData.decimals || 18,
+              timestamp: coinData.timestamp,
+              fetched_at: new Date().toISOString()
+            } : {
+              address: address,
+              chain: chain,
+              price: null,
+              error: 'Price not found',
+              fetched_at: new Date().toISOString()
+            };
+          }
+        }
+      } catch (error) {
+        console.error(`Error batch fetching prices for ${chain}:`, error.message);
+        // Add error results for this chain
+        for (const address of addresses) {
+          const tokenKey = `${chain}:${address}`;
+          results[tokenKey] = {
+            address: address,
+            chain: chain,
+            price: null,
+            error: error.message,
+            fetched_at: new Date().toISOString()
+          };
+        }
+      }
+    }
+
+    return results;
   }
 
 
 
   async fetchProtocolInfo(protocolSlug) {
-    try {
+    const requestKey = generateCacheKey('defillama', 'protocol-info', { slug: protocolSlug });
+    
+    return this.requestQueue.enqueue(requestKey, async () => {
       const url = `${this.baseUrl}/protocol/${protocolSlug}`;
       console.log(`Fetching DeFiLlama protocol info for: ${protocolSlug}`);
       
-      const response = await axios.get(url, { timeout: 8000 });
+      const response = await axios.get(url, { 
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'OpenDashboard/1.0',
+          'Accept': 'application/json'
+        }
+      });
+      
       const data = response.data;
       
       return {
@@ -121,22 +260,30 @@ export class DefiLlamaFetcher {
         mcap: data.mcap || null,
         fetched_at: new Date().toISOString()
       };
-    } catch (error) {
+    }).catch(error => {
       console.error(`Error fetching DeFiLlama protocol info for ${protocolSlug}:`, error.message);
       return {
         id: protocolSlug,
-        error: 'Failed to fetch protocol info',
+        error: error.message,
         fetched_at: new Date().toISOString()
       };
-    }
+    });
   }
 
   async fetchAllProtocols() {
-    try {
+    const requestKey = generateCacheKey('defillama', 'all-protocols', {});
+    
+    return this.requestQueue.enqueue(requestKey, async () => {
       const url = `${this.baseUrl}/protocols`;
       console.log('Fetching all DeFiLlama protocols');
       
-      const response = await axios.get(url, { timeout: 8000 });
+      const response = await axios.get(url, { 
+        timeout: 15000, // Longer timeout for large data set
+        headers: {
+          'User-Agent': 'OpenDashboard/1.0',
+          'Accept': 'application/json'
+        }
+      });
       
       return {
         protocols: response.data.map(protocol => ({
@@ -152,12 +299,48 @@ export class DefiLlamaFetcher {
         })),
         fetched_at: new Date().toISOString()
       };
-    } catch (error) {
+    }).catch(error => {
       console.error('Error fetching all protocols:', error.message);
       return {
         protocols: [],
-        error: 'Failed to fetch protocols',
+        error: error.message,
         fetched_at: new Date().toISOString()
+      };
+    });
+  }
+
+  /**
+   * Get request queue status for monitoring
+   */
+  getQueueStatus() {
+    return this.requestQueue.getStatus();
+  }
+
+  /**
+   * Clear pending requests (useful for cleanup)
+   */
+  clearQueue() {
+    this.requestQueue.clear();
+  }
+
+  /**
+   * Health check method
+   */
+  async healthCheck() {
+    try {
+      const status = this.getQueueStatus();
+      const isHealthy = status.circuitState === 'CLOSED' && status.failureCount < 3;
+      
+      return {
+        healthy: isHealthy,
+        status: status,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        healthy: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
       };
     }
   }

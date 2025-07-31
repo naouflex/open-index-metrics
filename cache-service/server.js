@@ -168,6 +168,26 @@ class CacheManager {
     }
   }
 
+  /**
+   * Smart caching with different TTLs based on data type
+   */
+  async setWithSmartTTL(key, data, dataType = 'default') {
+    const ttlConfig = {
+      'protocol-info': 3600, // 24 hours - protocol info changes infrequently
+      'token-price': 3600, // 5 minutes - prices change frequently
+      'protocol-tvl': 3600, // 30 minutes - TVL changes moderately
+      'all-protocols': 3600, // 12 hours - protocol list changes infrequently
+      'market-data': 3600, // 30 minutes - market data changes moderately
+      'volume-data': 3600, // 1 hour - volume data changes hourly
+      'default': 3600 // 1 hour default
+    };
+
+    const ttl = ttlConfig[dataType] || ttlConfig.default;
+    await this.set(key, data, ttl);
+    
+    logger.info(`Smart cache set: ${key} (type: ${dataType}, TTL: ${ttl}s)`);
+  }
+
   async cleanup() {
     // Redis handles expiration automatically
     logger.info(`Cache cleanup not needed - Redis handles TTL automatically`);
@@ -229,7 +249,7 @@ const theGraphCircuitBreaker = new CircuitBreaker(3, 15000); // Reduced timeout 
 const ethereumCircuitBreaker = new CircuitBreaker(3, 15000); // Reduced timeout to prevent 504 errors
 
 // Universal helper to safely fetch data with circuit breaker and stale fallback
-async function safeExternalFetch(cacheKey, fetchFunction, circuitBreaker = theGraphCircuitBreaker, timeoutMs = 8000) {
+async function safeExternalFetch(cacheKey, fetchFunction, circuitBreaker = theGraphCircuitBreaker, timeoutMs = 8000, dataType = 'default') {
   let data = await cacheManager.get(cacheKey);
   if (data) return data;
 
@@ -241,7 +261,7 @@ async function safeExternalFetch(cacheKey, fetchFunction, circuitBreaker = theGr
       );
       return Promise.race([fetchPromise, timeoutPromise]);
     });
-    await cacheManager.set(cacheKey, data, 3600);
+    await cacheManager.setWithSmartTTL(cacheKey, data, dataType);
     return data;
   } catch (fetchError) {
     // Log timeout-related errors for monitoring
@@ -273,7 +293,8 @@ app.get('/api/health', async (req, res) => {
       defiLlama: defiLlamaCircuitBreaker.state,
       theGraph: theGraphCircuitBreaker.state,
       ethereum: ethereumCircuitBreaker.state
-    }
+    },
+    defiLlamaQueue: defiLlamaFetcher.getQueueStatus()
   };
 
   try {
@@ -600,7 +621,9 @@ app.get('/api/defillama/tvl/:protocolSlug', async (req, res) => {
     const data = await safeExternalFetch(
       cacheKey,
       () => defiLlamaFetcher.fetchProtocolTVL(protocolSlug),
-      defiLlamaCircuitBreaker
+      defiLlamaCircuitBreaker,
+      12000, // Longer timeout for DefiLlama
+      'protocol-tvl' // Smart caching type
     );
     
     res.json(data);
@@ -616,11 +639,13 @@ app.get('/api/defillama/protocol/:slug', async (req, res) => {
     const { slug } = req.params;
     const cacheKey = `defillama:protocol:${slug}`;
     
-    let data = await cacheManager.get(cacheKey);
-    if (!data) {
-      data = await defiLlamaFetcher.fetchProtocolTVL(slug);
-      await cacheManager.set(cacheKey, data, 3600); // 1 hour
-    }
+    const data = await safeExternalFetch(
+      cacheKey,
+      () => defiLlamaFetcher.fetchProtocolTVL(slug),
+      defiLlamaCircuitBreaker,
+      12000,
+      'protocol-tvl'
+    );
     
     res.json(data);
   } catch (error) {
@@ -636,16 +661,46 @@ app.get('/api/defillama/token-price/:tokenAddress', async (req, res) => {
     const chain = req.query.chain || 'ethereum';
     const cacheKey = `defillama:token-price:${chain}:${tokenAddress}`;
     
-    let data = await cacheManager.get(cacheKey);
-    if (!data) {
-      data = await defiLlamaFetcher.fetchTokenPrice(tokenAddress, chain);
-      await cacheManager.set(cacheKey, data, 300); // 5 minutes for prices
-    }
+    const data = await safeExternalFetch(
+      cacheKey,
+      () => defiLlamaFetcher.fetchTokenPrice(tokenAddress, chain),
+      defiLlamaCircuitBreaker,
+      10000,
+      'token-price'
+    );
     
     res.json(data);
   } catch (error) {
     logger.error('DeFiLlama token price error:', error);
     res.status(500).json({ error: 'Failed to fetch token price' });
+  }
+});
+
+// NEW: Batch token prices endpoint
+app.post('/api/defillama/batch-token-prices', async (req, res) => {
+  try {
+    const { tokens } = req.body;
+    
+    if (!Array.isArray(tokens) || tokens.length === 0) {
+      return res.status(400).json({ error: 'Invalid tokens array' });
+    }
+    
+    // Create a cache key based on the token list
+    const tokenSignature = tokens.map(t => `${t.chain || 'ethereum'}:${t.tokenAddress}`).sort().join(',');
+    const cacheKey = `defillama:batch-prices:${Buffer.from(tokenSignature).toString('base64').slice(0, 32)}`;
+    
+    const data = await safeExternalFetch(
+      cacheKey,
+      () => defiLlamaFetcher.fetchMultipleTokenPrices(tokens),
+      defiLlamaCircuitBreaker,
+      15000,
+      'token-price'
+    );
+    
+    res.json(data);
+  } catch (error) {
+    logger.error('DeFiLlama batch token prices error:', error);
+    res.status(500).json({ error: 'Failed to fetch batch token prices' });
   }
 });
 
@@ -657,11 +712,13 @@ app.get('/api/defillama/protocol-info/:protocolSlug', async (req, res) => {
     const { protocolSlug } = req.params;
     const cacheKey = `defillama:protocol-info:${protocolSlug}`;
     
-    let data = await cacheManager.get(cacheKey);
-    if (!data) {
-      data = await defiLlamaFetcher.fetchProtocolInfo(protocolSlug);
-      await cacheManager.set(cacheKey, data, 7200); // 2 hours
-    }
+    const data = await safeExternalFetch(
+      cacheKey,
+      () => defiLlamaFetcher.fetchProtocolInfo(protocolSlug),
+      defiLlamaCircuitBreaker,
+      12000,
+      'protocol-info'
+    );
     
     res.json(data);
   } catch (error) {
@@ -675,16 +732,35 @@ app.get('/api/defillama/all-protocols', async (req, res) => {
   try {
     const cacheKey = 'defillama:all-protocols';
     
-    let data = await cacheManager.get(cacheKey);
-    if (!data) {
-      data = await defiLlamaFetcher.fetchAllProtocols();
-      await cacheManager.set(cacheKey, data, 1800); // 30 minutes
-    }
+    const data = await safeExternalFetch(
+      cacheKey,
+      () => defiLlamaFetcher.fetchAllProtocols(),
+      defiLlamaCircuitBreaker,
+      20000, // Even longer timeout for large dataset
+      'all-protocols'
+    );
     
     res.json(data);
   } catch (error) {
     logger.error('DeFiLlama all protocols error:', error);
     res.status(500).json({ error: 'Failed to fetch all protocols' });
+  }
+});
+
+// NEW: DefiLlama queue status monitoring endpoint
+app.get('/api/defillama/queue-status', async (req, res) => {
+  try {
+    const queueStatus = defiLlamaFetcher.getQueueStatus();
+    const healthCheck = await defiLlamaFetcher.healthCheck();
+    
+    res.json({
+      ...queueStatus,
+      health: healthCheck,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('DeFiLlama queue status error:', error);
+    res.status(500).json({ error: 'Failed to get queue status' });
   }
 });
 
@@ -1365,10 +1441,10 @@ async function refreshAllData() {
           ]);
 
           if (marketData.status === 'fulfilled') {
-            await cacheManager.set(`coingecko:market-data:${protocol.coingeckoId}`, marketData.value, 3600);
+            await cacheManager.setWithSmartTTL(`coingecko:market-data:${protocol.coingeckoId}`, marketData.value, 'market-data');
           }
           if (tvlData.status === 'fulfilled') {
-            await cacheManager.set(`defillama:tvl:${protocol.defiLlamaSlug}`, tvlData.value, 3600);
+            await cacheManager.setWithSmartTTL(`defillama:tvl:${protocol.defiLlamaSlug}`, tvlData.value, 'protocol-tvl');
           }
           
           logger.info(`Light refresh: ${protocol.coingeckoId}`);
