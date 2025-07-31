@@ -8,10 +8,28 @@ import {
   useColorModeValue
 } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
+import { useState, useEffect } from 'react';
 
 export default function Footer() {
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const [lastRefresh, setLastRefresh] = useState(null);
+
+  useEffect(() => {
+    // Fetch the actual cache refresh time
+    fetch('/api/cache/last-refresh')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.lastRefresh) {
+          setLastRefresh(new Date(data.lastRefresh));
+        }
+      })
+      .catch(error => {
+        console.error('Failed to fetch last refresh time:', error);
+        // Fallback to current time if API fails
+        setLastRefresh(new Date());
+      });
+  }, []);
 
   return (
     <Box 
@@ -34,7 +52,7 @@ export default function Footer() {
             Data sources: CoinGecko, DeFiLlama, The Graph Protocol, Curve API
           </Text>
           <Text fontSize="xs" color="gray.400" textAlign="center">
-            Last updated: {new Date().toLocaleString()}
+            Last updated: {lastRefresh ? lastRefresh.toLocaleString() : 'Loading...'}
           </Text>
           <HStack spacing={{ base: 2, md: 4 }} justify="center" flexWrap="wrap">
             <Text fontSize="xs" color="gray.400">

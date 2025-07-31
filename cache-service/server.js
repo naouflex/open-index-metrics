@@ -196,6 +196,7 @@ class CacheManager {
 }
 
 let cacheManager;
+let lastRefreshTimestamp = null;
 
 // Simple Circuit Breaker to prevent cascade failures
 class CircuitBreaker {
@@ -374,6 +375,28 @@ app.get('/api/admin/flush-cache', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Failed to flush cache',
+      message: error.message 
+    });
+  }
+});
+
+// Cache metadata endpoint - provides last refresh time
+app.get('/api/cache/last-refresh', async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      lastRefresh: lastRefreshTimestamp,
+      nextRefresh: lastRefreshTimestamp ? 
+        new Date(new Date(lastRefreshTimestamp).getTime() + 60 * 60 * 1000).toISOString() : 
+        null,
+      refreshInterval: '1 hour',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('Error getting cache metadata:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to get cache metadata',
       message: error.message 
     });
   }
@@ -1460,7 +1483,10 @@ async function refreshAllData() {
     // Clean up expired cache entries
     await cacheManager.cleanup();
     
-    logger.info(`Scheduled data refresh completed`);
+    // Update last refresh timestamp
+    lastRefreshTimestamp = new Date().toISOString();
+    
+    logger.info(`Scheduled data refresh completed at ${lastRefreshTimestamp}`);
   } catch (error) {
     logger.error('Error during data refresh:', error);
   }
@@ -1480,11 +1506,14 @@ async function startServer() {
     
     cacheManager = new CacheManager(redis);
     
-    // Schedule data refresh every 30 minutes for better cache coverage
-    cron.schedule('*/30 * * * *', refreshAllData);
+    // Schedule data refresh every hour as requested
+    cron.schedule('0 * * * *', refreshAllData);
     
     // Initial data refresh
-    setTimeout(refreshAllData, 5000); // 5 seconds after startup
+    setTimeout(async () => {
+      logger.info('Starting initial data refresh...');
+      await refreshAllData();
+    }, 5000); // 5 seconds after startup
     
     app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Cache service running on port ${PORT} (all interfaces)`);
