@@ -85,7 +85,7 @@ Customize the dashboard display, metrics, and calculations:
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Docker and Docker Compose
 - Git
 
 ### Installation
@@ -95,14 +95,15 @@ Customize the dashboard display, metrics, and calculations:
 git clone https://github.com/your-username/open-dashboard.git
 cd open-dashboard
 
-# Install dependencies
-npm install
+# Create environment file
+cp .env.example .env
+# Edit .env with your API keys and configuration
 
-# Start development server
-npm run dev
+# Start development environment
+./scripts/dev.sh
 ```
 
-The dashboard will be available at `http://localhost:5173`
+The dashboard will be available at `http://localhost:3000`
 
 ### Adding Your First Protocol
 

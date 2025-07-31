@@ -830,6 +830,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       
       {/* Emissions */}
       <Td 
+        textAlign="center"
         minW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
         maxW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
         w={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
@@ -838,6 +839,7 @@ function ProtocolRow({ protocol, shouldLoad = false }) {
       </Td>
       
       <Td 
+        textAlign="center"
         minW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
         maxW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
         w={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
@@ -1687,6 +1689,7 @@ export default function DeFiDashboard() {
                 
                 {/* Emissions */}
                 <SortableHeader 
+                  textAlign="center"
                   column="nextEmissions" 
                   currentSort={sortConfig} 
                   onSort={handleSort} 
@@ -1700,6 +1703,7 @@ export default function DeFiDashboard() {
                   Next 12 mo Emissions / Unlocks
                 </SortableHeader>
                 <SortableHeader 
+                  textAlign="center"
                   column="nextReleasePercentage" 
                   currentSort={sortConfig} 
                   onSort={handleSort} 
@@ -1713,6 +1717,7 @@ export default function DeFiDashboard() {
                   Next 12 month release %
                 </SortableHeader>
                 <SortableHeader 
+                  textAlign="center"
                   column="emissionsCatalyst" 
                   currentSort={sortConfig} 
                   onSort={handleSort} 
