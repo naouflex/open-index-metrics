@@ -204,7 +204,9 @@ export default function DeFiDashboard() {
       const totalSupply = protocol.ticker === 'ALCX' 
         ? ((coinGeckoData?.marketData?.data?.total_supply || 0) - (alcxDeadBalance?.data?.balance || 0))
         : (coinGeckoData?.marketData?.data?.total_supply || 0);
-      const circSupply = coinGeckoData?.marketData?.data?.circulating_supply || 0;
+      const circSupply = protocol.ticker === 'FXN'
+        ? ((coinGeckoData?.marketData?.data?.circulating_supply || 0) + (fxnHolderBalance?.data?.balance || 0))
+        : (coinGeckoData?.marketData?.data?.circulating_supply || 0);
       const protocolTVL = defiLlamaTVL?.data || 0;
       
       const yearsOnChain = calculateYearsOnChain(protocol.mainnetLaunch);

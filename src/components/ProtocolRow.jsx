@@ -158,7 +158,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
   const totalSupply = protocol.ticker === 'ALCX' 
     ? ((coinGeckoData.marketData?.data?.total_supply || 0) - (alcxDeadBalance.data?.balance || 0))
     : (coinGeckoData.marketData?.data?.total_supply || 0);
-  const circSupply = coinGeckoData.marketData?.data?.circulating_supply || 0;
+  const circSupply = protocol.ticker === 'FXN'
+    ? ((coinGeckoData.marketData?.data?.circulating_supply || 0) + (fxnHolderBalance.data?.balance || 0))
+    : (coinGeckoData.marketData?.data?.circulating_supply || 0);
   const protocolTVL = defiLlamaTVL.data || 0;
   
   // DEX aggregation
@@ -546,7 +548,15 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
         w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
       >
         <Skeleton isLoaded={!isLoading}>
-          <Text fontSize="sm">{formatSupply(circSupply)}</Text>
+          <HStack spacing={1} justify="center">
+            <Text fontSize="sm">{formatSupply(circSupply)}</Text>
+            {protocol.ticker === 'FXN' && (
+              <SpecialTreatmentBadge 
+                explanation="Circulating supply includes veFXN contract balance (tokens)" 
+                protocolTicker={protocol.ticker}
+              />
+            )}
+          </HStack>
         </Skeleton>
       </Td>
       
