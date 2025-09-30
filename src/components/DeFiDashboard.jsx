@@ -42,9 +42,50 @@ import {
 import ProtocolRow from './ProtocolRow.jsx';
 import SortableHeader from './SortableHeader.jsx';
 import DataSourceBadge from './DataSourceBadge.jsx';
+import ColumnVisibilityMenu from './ColumnVisibilityMenu.jsx';
+import ProtocolFilter from './ProtocolFilter.jsx';
 import { exportToCSV } from '../utils/csvExport.js';
 
-
+// ================= COLUMN DEFINITIONS =================
+const COLUMN_DEFINITIONS = {
+  protocol: 'Protocol',
+  links: 'Links',
+  blockchain: 'Blockchain',
+  mainnetLaunch: 'V1 Protocol Mainnet',
+  years: 'Years Onchain',
+  status: '$OPEN Status',
+  stablePrice: 'Stable Price',
+  govTokenPrice: 'Gov Token Price',
+  currentWeight: 'Current Weight %',
+  marketCap: 'Market Cap',
+  fdv: 'FDV',
+  volume24h: 'Volume (24hr)',
+  volume30d: 'Volume (30d avg)',
+  tvlCG: 'TVL',
+  mcToFdv: 'Market Cap / FDV (%)',
+  mcToTvl: 'Market Cap / TVL (%)',
+  fdvToTvl: 'FDV / TVL (%)',
+  maxSupply: 'Max Supply',
+  totalSupply: 'Total Supply',
+  circSupply: 'Circ Supply',
+  circToTotal: 'Circ Supply % of Total',
+  topExchanges: 'Top 3 Exchanges',
+  curveTVL: 'Curve TVL',
+  curveVolume: 'Curve 24hr Vol',
+  uniswapTVL: 'Uniswap TVL',
+  uniswapVolume: 'Uniswap 24hr Vol',
+  balancerTVL: 'Balancer TVL',
+  balancerVolume: 'Balancer 24hr Vol',
+  sushiTVL: 'Sushi TVL',
+  sushiVolume: 'Sushi 24hr Vol',
+  mainnetDexTVL: 'Mainnet DEX TVL',
+  dexVolume24h: '24hr DEX volume',
+  dexLiquidityTurnover: 'DEX Liquidity Turnover',
+  nextEmissions: 'Next 12 mo Emissions / Unlocks',
+  nextReleasePercentage: 'Next 12 month release %',
+  emissionsCatalyst: 'Emissions, unlocks catalyst',
+  protocolTVL: 'Protocol TVL'
+};
 
 // ================= MAIN DASHBOARD COMPONENT =================
 
@@ -54,6 +95,66 @@ export default function DeFiDashboard() {
   
   const [loadedProtocols, setLoadedProtocols] = useState(new Set());
   const [sortConfig, setSortConfig] = useState({ column: null, direction: 'desc' });
+  
+  // Column visibility state with localStorage
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem('dashboardVisibleColumns');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing saved column visibility:', e);
+      }
+    }
+    // Default: show all columns
+    return Object.keys(COLUMN_DEFINITIONS).reduce((acc, key) => {
+      acc[key] = true;
+      return acc;
+    }, {});
+  });
+  
+  // Save to localStorage whenever visibility changes
+  useEffect(() => {
+    localStorage.setItem('dashboardVisibleColumns', JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+  
+  // Toggle column visibility
+  const toggleColumn = (columnKey) => {
+    setVisibleColumns(prev => ({
+      ...prev,
+      [columnKey]: !prev[columnKey]
+    }));
+  };
+  
+  // Protocol visibility state with localStorage
+  const [visibleProtocols, setVisibleProtocols] = useState(() => {
+    const saved = localStorage.getItem('dashboardVisibleProtocols');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing saved protocol visibility:', e);
+      }
+    }
+    // Default: show all protocols
+    return protocols.reduce((acc, protocol) => {
+      acc[protocol.ticker] = true;
+      return acc;
+    }, {});
+  });
+  
+  // Save to localStorage whenever visibility changes
+  useEffect(() => {
+    localStorage.setItem('dashboardVisibleProtocols', JSON.stringify(visibleProtocols));
+  }, [visibleProtocols]);
+  
+  // Toggle protocol visibility
+  const toggleProtocol = (ticker) => {
+    setVisibleProtocols(prev => ({
+      ...prev,
+      [ticker]: !prev[ticker]
+    }));
+  };
 
   // All market data hooks for sorting (only load after protocols are loaded)
   const allProtocolsLoaded = loadedProtocols.size === protocols.length;
@@ -424,6 +525,11 @@ export default function DeFiDashboard() {
     });
   }, [protocolsWithData, sortConfig]);
 
+  // Filter protocols based on visibility
+  const filteredProtocols = useMemo(() => {
+    return sortedProtocols.filter(protocol => visibleProtocols[protocol.ticker]);
+  }, [sortedProtocols, visibleProtocols]);
+
   const handleSort = (column) => {
     setSortConfig(prevConfig => ({
       column,
@@ -545,16 +651,28 @@ export default function DeFiDashboard() {
           </Box>
         </HStack>
 
-        <Button
-          leftIcon={<DownloadIcon />}
-          colorScheme="blue"
-          size="sm"
-          onClick={handleExportCSV}
-          isDisabled={!allProtocolsLoaded}
-          _hover={{ bg: 'blue.600' }}
-        >
-          Export to CSV
-        </Button>
+        <HStack spacing={2}>
+          <ProtocolFilter
+            visibleProtocols={visibleProtocols}
+            onToggleProtocol={toggleProtocol}
+            protocols={protocols}
+          />
+          <ColumnVisibilityMenu
+            visibleColumns={visibleColumns}
+            onToggleColumn={toggleColumn}
+            columnDefinitions={COLUMN_DEFINITIONS}
+          />
+          <Button
+            leftIcon={<DownloadIcon />}
+            colorScheme="blue"
+            size="sm"
+            onClick={handleExportCSV}
+            isDisabled={!allProtocolsLoaded}
+            _hover={{ bg: 'blue.600' }}
+          >
+            Export to CSV
+          </Button>
+        </HStack>
       </Flex>
       <Box 
         flex="1"
@@ -602,550 +720,625 @@ export default function DeFiDashboard() {
           <Thead bg={tableHeaderBg} position="sticky" top={0} zIndex={3}>
             <Tr>
               {/* Basic Info */}
-              <SortableHeader 
-                column="protocol" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource=""
-                fontSize={{ base: "2xs", sm: "xs" }}
-                position="sticky"
-                left={0}
-                bg={tableHeaderBg}
-                zIndex={4}
-                borderRight="2px solid"
-                borderRightColor={useColorModeValue('gray.300', 'gray.600')}
-                boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-                minW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
-                maxW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
-                w={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
-                textAlign="center"
-                centerVertically={true}
-              >
-                Protocol
-              </SortableHeader>
-              <Th 
-                fontSize="xs"
-                textAlign="center"
-                minW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
-                maxW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
-                w={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Links</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="External Links" />
+              {visibleColumns.protocol && (
+                <SortableHeader 
+                  column="protocol" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource=""
+                  fontSize={{ base: "2xs", sm: "xs" }}
+                  position="sticky"
+                  left={0}
+                  bg={tableHeaderBg}
+                  zIndex={4}
+                  borderRight="2px solid"
+                  borderRightColor={useColorModeValue('gray.300', 'gray.600')}
+                  boxShadow="2px 0 4px rgba(0,0,0,0.1)"
+                  minW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
+                  maxW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
+                  w={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
+                  textAlign="center"
+                  centerVertically={true}
+                >
+                  Protocol
+                </SortableHeader>
+              )}
+              {visibleColumns.links && (
+                <Th 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
+                  maxW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
+                  w={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Links</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="External Links" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <SortableHeader 
-                column="blockchain" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="Required" 
-                fontSize="xs"
-                minW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
-                maxW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
-                w={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
-              >
-                Blockchain
-              </SortableHeader>
-              <SortableHeader 
-                column="mainnetLaunch" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="docs" 
-                fontSize="xs"
-                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-              >
-                V1 Protocol Mainnet
-              </SortableHeader>
-              <SortableHeader 
-                column="years" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="calc" 
-                fontSize="xs"
-                minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-                w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-              >
-                Years Onchain
-              </SortableHeader>
-              <SortableHeader 
-                column="status" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="Manual" 
-                fontSize="xs"
-                minW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
-                maxW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
-                w={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
-              >
-                $OPEN Status
-              </SortableHeader>
-              <SortableHeader 
-                column="stablePrice" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="DeFiLlama API" 
-                fontSize="xs"
-                textAlign="center"
-                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-              >
-                Stable Price
-              </SortableHeader>
-              <SortableHeader 
-                column="govTokenPrice" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="DeFiLlama API" 
-                fontSize="xs"
-                textAlign="center"
-                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-              >
-                Gov Token Price
-              </SortableHeader>
-              <SortableHeader 
-                column="currentWeight" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="calc" 
-                fontSize="xs"
-                textAlign="center"
-                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-              >
-                Current Weight %
-              </SortableHeader>
+                </Th>
+              )}
+              {visibleColumns.blockchain && (
+                <SortableHeader 
+                  column="blockchain" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="Required" 
+                  fontSize="xs"
+                  minW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
+                  maxW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
+                  w={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
+                >
+                  Blockchain
+                </SortableHeader>
+              )}
+              {visibleColumns.mainnetLaunch && (
+                <SortableHeader 
+                  column="mainnetLaunch" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="docs" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                >
+                  V1 Protocol Mainnet
+                </SortableHeader>
+              )}
+              {visibleColumns.years && (
+                <SortableHeader 
+                  column="years" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="calc" 
+                  fontSize="xs"
+                  minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                  maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                  w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                >
+                  Years Onchain
+                </SortableHeader>
+              )}
+              {visibleColumns.status && (
+                <SortableHeader 
+                  column="status" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="Manual" 
+                  fontSize="xs"
+                  minW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
+                  maxW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
+                  w={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
+                >
+                  $OPEN Status
+                </SortableHeader>
+              )}
+              {visibleColumns.stablePrice && (
+                <SortableHeader 
+                  column="stablePrice" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="DeFiLlama API" 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                  w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                >
+                  Stable Price
+                </SortableHeader>
+              )}
+              {visibleColumns.govTokenPrice && (
+                <SortableHeader 
+                  column="govTokenPrice" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="DeFiLlama API" 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                  w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                >
+                  Gov Token Price
+                </SortableHeader>
+              )}
+              {visibleColumns.currentWeight && (
+                <SortableHeader 
+                  column="currentWeight" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="calc" 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                  w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                >
+                  Current Weight %
+                </SortableHeader>
+              )}
               
               {/* Market Metrics */}
-              <SortableHeader 
-                column="marketCap" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs"
-                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-              >
-                Market Cap
-              </SortableHeader>
-              <SortableHeader 
-                column="fdv" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs"
-                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-              >
-                FDV
-              </SortableHeader>
-              <SortableHeader 
-                column="volume24h" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs"
-                minW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
-                maxW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
-                w={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
-              >
-                Volume (24hr)
-              </SortableHeader>
-              <SortableHeader 
-                column="volume30d" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs"
-                minW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
-                maxW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
-                w={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
-              >
-                Volume (30d avg)
-              </SortableHeader>
-              <SortableHeader 
-                column="tvlCG" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs" 
-                color="blue.500"
-                minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-                w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-              >
-                TVL
-              </SortableHeader>
+              {visibleColumns.marketCap && (
+                <SortableHeader 
+                  column="marketCap" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                >
+                  Market Cap
+                </SortableHeader>
+              )}
+              {visibleColumns.fdv && (
+                <SortableHeader 
+                  column="fdv" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                >
+                  FDV
+                </SortableHeader>
+              )}
+              {visibleColumns.volume24h && (
+                <SortableHeader 
+                  column="volume24h" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs"
+                  minW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
+                  maxW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
+                  w={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
+                >
+                  Volume (24hr)
+                </SortableHeader>
+              )}
+              {visibleColumns.volume30d && (
+                <SortableHeader 
+                  column="volume30d" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs"
+                  minW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
+                  maxW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
+                  w={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
+                >
+                  Volume (30d avg)
+                </SortableHeader>
+              )}
+              {visibleColumns.tvlCG && (
+                <SortableHeader 
+                  column="tvlCG" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs" 
+                  color="blue.500"
+                  minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                  maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                  w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                >
+                  TVL
+                </SortableHeader>
+              )}
               
               {/* Ratios */}
-              <SortableHeader 
-                column="mcToFdv" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="calc" 
-                fontSize="xs"
-                minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-                maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-                w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-              >
-                Market Cap / FDV (%)
-              </SortableHeader>
-              <SortableHeader 
-                column="mcToTvl" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="calc" 
-                fontSize="xs"
-                minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-                maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-                w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-              >
-                Market Cap / TVL (%)
-              </SortableHeader>
-              <SortableHeader 
-                column="fdvToTvl" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="calc" 
-                fontSize="xs"
-                minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
-                maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
-                w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
-              >
-                FDV / TVL (%)
-              </SortableHeader>
+              {visibleColumns.mcToFdv && (
+                <SortableHeader 
+                  column="mcToFdv" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="calc" 
+                  fontSize="xs"
+                  minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                >
+                  Market Cap / FDV (%)
+                </SortableHeader>
+              )}
+              {visibleColumns.mcToTvl && (
+                <SortableHeader 
+                  column="mcToTvl" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="calc" 
+                  fontSize="xs"
+                  minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                >
+                  Market Cap / TVL (%)
+                </SortableHeader>
+              )}
+              {visibleColumns.fdvToTvl && (
+                <SortableHeader 
+                  column="fdvToTvl" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="calc" 
+                  fontSize="xs"
+                  minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                  maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                  w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                >
+                  FDV / TVL (%)
+                </SortableHeader>
+              )}
               
               {/* Supply */}
-              <SortableHeader 
-                column="maxSupply" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs"
-                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-              >
-                Max Supply<br/>(theoretical max)
-              </SortableHeader>
-              <SortableHeader 
-                column="totalSupply" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs"
-                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-              >
-                Total Supply<br/>(onchain supply minus burned)
-              </SortableHeader>
-              <SortableHeader 
-                column="circSupply" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="CoinGecko API" 
-                fontSize="xs"
-                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-              >
-                Circ Supply<br/>(public tokens, incl ve)
-              </SortableHeader>
-              <SortableHeader 
-                column="circToTotal" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="calc" 
-                fontSize="xs"
-                minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
-                maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
-                w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
-              >
-                Circ Supply % of Total
-              </SortableHeader>
+              {visibleColumns.maxSupply && (
+                <SortableHeader 
+                  column="maxSupply" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                >
+                  Max Supply<br/>(theoretical max)
+                </SortableHeader>
+              )}
+              {visibleColumns.totalSupply && (
+                <SortableHeader 
+                  column="totalSupply" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                >
+                  Total Supply<br/>(onchain supply minus burned)
+                </SortableHeader>
+              )}
+              {visibleColumns.circSupply && (
+                <SortableHeader 
+                  column="circSupply" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="CoinGecko API" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                >
+                  Circ Supply<br/>(public tokens, incl ve)
+                </SortableHeader>
+              )}
+              {visibleColumns.circToTotal && (
+                <SortableHeader 
+                  column="circToTotal" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="calc" 
+                  fontSize="xs"
+                  minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                  maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                  w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                >
+                  Circ Supply % of Total
+                </SortableHeader>
+              )}
               
               {/* Exchanges */}
-              <Th 
-                fontSize="xs"
-                textAlign="center"
-                minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
-                maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
-                w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Top 3 Exchanges<br/>(24hr combined volume)</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="CoinGecko API" />
+              {visibleColumns.topExchanges && (
+                <Th 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                  maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                  w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Top 3 Exchanges<br/>(24hr combined volume)</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="CoinGecko API" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
+                </Th>
+              )}
               
               {/* DEX Data */}
-              <Th 
-                fontSize={{ base: "2xs", sm: "xs" }} 
-                color="red.600"
-                textAlign="center"
-                minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
-                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
-                w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Curve TVL</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Curve API" />
+              {visibleColumns.curveTVL && (
+                <Th 
+                  fontSize={{ base: "2xs", sm: "xs" }} 
+                  color="red.600"
+                  textAlign="center"
+                  minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                  maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                  w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Curve TVL</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Curve API" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="red.600"
-                textAlign="center"
-                minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-                maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-                w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Curve 24hr Vol</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Curve API" />
+                </Th>
+              )}
+              {visibleColumns.curveVolume && (
+                <Th 
+                  fontSize="xs" 
+                  color="red.600"
+                  textAlign="center"
+                  minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                  maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                  w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Curve 24hr Vol</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Curve API" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="orange.600"
-                textAlign="center"
-                minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-                maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-                w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Uniswap TVL</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Uniswap Subgraph" />
+                </Th>
+              )}
+              {visibleColumns.uniswapTVL && (
+                <Th 
+                  fontSize="xs" 
+                  color="orange.600"
+                  textAlign="center"
+                  minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                  maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                  w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Uniswap TVL</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Uniswap Subgraph" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="orange.600"
-                textAlign="center"
-                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Uniswap 24hr Vol</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Uniswap Subgraph" />
+                </Th>
+              )}
+              {visibleColumns.uniswapVolume && (
+                <Th 
+                  fontSize="xs" 
+                  color="orange.600"
+                  textAlign="center"
+                  minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Uniswap 24hr Vol</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Uniswap Subgraph" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="green.600"
-                textAlign="center"
-                minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-                maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-                w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Balancer TVL</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
+                </Th>
+              )}
+              {visibleColumns.balancerTVL && (
+                <Th 
+                  fontSize="xs" 
+                  color="green.600"
+                  textAlign="center"
+                  minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                  maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                  w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Balancer TVL</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="green.600"
-                textAlign="center"
-                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Balancer 24hr Vol</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
+                </Th>
+              )}
+              {visibleColumns.balancerVolume && (
+                <Th 
+                  fontSize="xs" 
+                  color="green.600"
+                  textAlign="center"
+                  minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Balancer 24hr Vol</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="purple.600"
-                textAlign="center"
-                minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
-                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
-                w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Sushi TVL</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Sushiswap Subgraph" />
+                </Th>
+              )}
+              {visibleColumns.sushiTVL && (
+                <Th 
+                  fontSize="xs" 
+                  color="purple.600"
+                  textAlign="center"
+                  minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                  maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                  w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Sushi TVL</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Sushiswap Subgraph" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="purple.600"
-                textAlign="center"
-                minW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
-                maxW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
-                w={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Sushi 24hr Vol</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="Sushiswap Subgraph" />
+                </Th>
+              )}
+              {visibleColumns.sushiVolume && (
+                <Th 
+                  fontSize="xs" 
+                  color="purple.600"
+                  textAlign="center"
+                  minW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
+                  maxW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
+                  w={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Sushi 24hr Vol</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="Sushiswap Subgraph" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="blue.600" 
-                fontWeight="bold"
-                textAlign="center"
-                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Mainnet DEX TVL</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="calc" />
+                </Th>
+              )}
+              {visibleColumns.mainnetDexTVL && (
+                <Th 
+                  fontSize="xs" 
+                  color="blue.600" 
+                  fontWeight="bold"
+                  textAlign="center"
+                  minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                  w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>Mainnet DEX TVL</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="calc" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs" 
-                color="blue.600"
-                textAlign="center"
-                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>24hr DEX volume</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="calc" />
+                </Th>
+              )}
+              {visibleColumns.dexVolume24h && (
+                <Th 
+                  fontSize="xs" 
+                  color="blue.600"
+                  textAlign="center"
+                  minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>24hr DEX volume</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="calc" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
-              <Th 
-                fontSize="xs"
-                textAlign="center"
-                minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-                maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-                w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
-              >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>DEX Liquidity Turnover</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="calc" />
+                </Th>
+              )}
+              {visibleColumns.dexLiquidityTurnover && (
+                <Th 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                >
+                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                    <Text mb={2}>DEX Liquidity Turnover</Text>
+                    <Box position="absolute" bottom={1}>
+                      <DataSourceBadge source="calc" />
+                    </Box>
                   </Box>
-                </Box>
-              </Th>
+                </Th>
+              )}
               
               {/* Emissions */}
-              <SortableHeader 
-                textAlign="center"
-                column="nextEmissions" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="Protocol team" 
-                fontSize="xs" 
-                minW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
-                maxW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
-                w={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
-              >
-                Next 12 mo Emissions / Unlocks
-              </SortableHeader>
-              <SortableHeader 
-                textAlign="center"
-                column="nextReleasePercentage" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="Protocol team" 
-                fontSize="xs" 
-                minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-                maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-                w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-              >
-                Next 12 month release %
-              </SortableHeader>
-              <SortableHeader 
-                textAlign="center"
-                column="emissionsCatalyst" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="Protocol team" 
-                fontSize="xs" 
-                minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
-                maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
-                w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
-              >
-                Emissions, unlocks catalyst
-              </SortableHeader>
+              {visibleColumns.nextEmissions && (
+                <SortableHeader 
+                  textAlign="center"
+                  column="nextEmissions" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="Protocol team" 
+                  fontSize="xs" 
+                  minW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
+                  maxW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
+                  w={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
+                >
+                  Next 12 mo Emissions / Unlocks
+                </SortableHeader>
+              )}
+              {visibleColumns.nextReleasePercentage && (
+                <SortableHeader 
+                  textAlign="center"
+                  column="nextReleasePercentage" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="Protocol team" 
+                  fontSize="xs" 
+                  minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                  maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                  w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                >
+                  Next 12 month release %
+                </SortableHeader>
+              )}
+              {visibleColumns.emissionsCatalyst && (
+                <SortableHeader 
+                  textAlign="center"
+                  column="emissionsCatalyst" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="Protocol team" 
+                  fontSize="xs" 
+                  minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                  maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                  w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                >
+                  Emissions, unlocks catalyst
+                </SortableHeader>
+              )}
               
               {/* Protocol TVL */}
-              <SortableHeader 
-                column="protocolTVL" 
-                currentSort={sortConfig} 
-                onSort={handleSort} 
-                onReset={handleReset} 
-                dataSource="DeFiLlama API" 
-                fontSize="xs"
-                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-              >
-                Protocol TVL<br/>(exclude staking)
-              </SortableHeader>
+              {visibleColumns.protocolTVL && (
+                <SortableHeader 
+                  column="protocolTVL" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="DeFiLlama API" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                >
+                  Protocol TVL<br/>(exclude staking)
+                </SortableHeader>
+              )}
             </Tr>
           </Thead>
           <Tbody>
-            {sortedProtocols.map((protocol) => (
+            {filteredProtocols.map((protocol) => (
               <ProtocolRow
                 key={protocol.ticker}
                 protocol={protocol}
                 shouldLoad={loadedProtocols.has(protocol.originalIndex)}
                 currentWeight={protocolWeights[protocol.ticker]}
+                visibleColumns={visibleColumns}
               />
             ))}
           </Tbody>
