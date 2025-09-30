@@ -5,36 +5,16 @@ import {
   Tbody,
   Tr,
   Th,
-  Td,
   Text,
-  Badge,
-  Skeleton,
-  Container,
-  HStack,
-  VStack,
-  Tooltip,
   useColorModeValue,
-  Alert,
-  AlertTitle,
-  AlertDescription,
-  Icon,
-  Link,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
-  useDisclosure,
   Flex
 } from '@chakra-ui/react';
 
-import { AlertIcon, TriangleUpIcon, TriangleDownIcon, ExternalLinkIcon, InfoIcon, DownloadIcon } from '@chakra-ui/icons';
+import { DownloadIcon } from '@chakra-ui/icons';
 import { useState, useEffect, useMemo } from 'react';
 
-import { protocols, calculateYearsOnChain, formatNumber, formatPercentage, formatSupply } from '../config/protocols.js';
+import { protocols, calculateYearsOnChain} from '../config/protocols.js';
 import {
   useCoinGeckoMarketData,
   useCoinGeckoComplete,
@@ -360,6 +340,12 @@ export default function DeFiDashboard() {
             minWidth: '100%',
             borderSpacing: 0,
             borderCollapse: 'collapse',
+            '& th, & td': {
+              paddingTop: '6px',
+              paddingBottom: '6px',
+              paddingLeft: '2px',
+              paddingRight: '2px'
+            },
             '& tbody tr:last-child td': {
               borderBottom: 'none',
               paddingBottom: 0
@@ -383,9 +369,9 @@ export default function DeFiDashboard() {
                 borderRight="2px solid"
                 borderRightColor={useColorModeValue('gray.300', 'gray.600')}
                 boxShadow="2px 0 4px rgba(0,0,0,0.1)"
-                minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
-                maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
-                w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+                minW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
+                maxW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
+                w={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
                 textAlign="center"
                 centerVertically={true}
               >
@@ -394,9 +380,9 @@ export default function DeFiDashboard() {
               <Th 
                 fontSize="xs"
                 textAlign="center"
-                minW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
-                maxW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
-                w={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+                minW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
+                maxW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
+                w={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Links</Text>
@@ -412,9 +398,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="Required" 
                 fontSize="xs"
-                minW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
-                maxW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
-                w={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
+                minW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
+                maxW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
+                w={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
               >
                 Blockchain
               </SortableHeader>
@@ -425,9 +411,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="docs" 
                 fontSize="xs"
-                minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
               >
                 V1 Protocol Mainnet
               </SortableHeader>
@@ -438,9 +424,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="calc" 
                 fontSize="xs"
-                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
               >
                 Years Onchain
               </SortableHeader>
@@ -451,9 +437,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="Manual" 
                 fontSize="xs"
-                minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-                maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-                w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                minW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
+                maxW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
+                w={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
               >
                 $OPEN Status
               </SortableHeader>
@@ -466,9 +452,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="CoinGecko API" 
                 fontSize="xs"
-                minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
               >
                 Market Cap
               </SortableHeader>
@@ -479,9 +465,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="CoinGecko API" 
                 fontSize="xs"
-                minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-                w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
               >
                 FDV
               </SortableHeader>
@@ -492,9 +478,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="CoinGecko API" 
                 fontSize="xs"
-                minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                minW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
+                maxW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
+                w={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
               >
                 Volume (24hr)
               </SortableHeader>
@@ -505,9 +491,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="CoinGecko API" 
                 fontSize="xs"
-                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                minW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
+                maxW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
+                w={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
               >
                 Volume (30d avg)
               </SortableHeader>
@@ -519,9 +505,9 @@ export default function DeFiDashboard() {
                 dataSource="CoinGecko API" 
                 fontSize="xs" 
                 color="blue.500"
-                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+                w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
               >
                 TVL
               </SortableHeader>
@@ -534,9 +520,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="calc" 
                 fontSize="xs"
-                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
               >
                 Market Cap / FDV (%)
               </SortableHeader>
@@ -547,9 +533,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="calc" 
                 fontSize="xs"
-                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
               >
                 Market Cap / TVL (%)
               </SortableHeader>
@@ -560,9 +546,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="calc" 
                 fontSize="xs"
-                minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
               >
                 FDV / TVL (%)
               </SortableHeader>
@@ -575,9 +561,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="CoinGecko API" 
                 fontSize="xs"
-                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
               >
                 Max Supply<br/>(theoretical max)
               </SortableHeader>
@@ -588,9 +574,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="CoinGecko API" 
                 fontSize="xs"
-                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
               >
                 Total Supply<br/>(onchain supply minus burned)
               </SortableHeader>
@@ -601,9 +587,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="CoinGecko API" 
                 fontSize="xs"
-                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
               >
                 Circ Supply<br/>(public tokens, incl ve)
               </SortableHeader>
@@ -614,9 +600,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="calc" 
                 fontSize="xs"
-                minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-                w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+                minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+                w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
               >
                 Circ Supply % of Total
               </SortableHeader>
@@ -625,9 +611,9 @@ export default function DeFiDashboard() {
               <Th 
                 fontSize="xs"
                 textAlign="center"
-                minW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
-                maxW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
-                w={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
+                minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Top 3 Exchanges<br/>(24hr combined volume)</Text>
@@ -642,9 +628,9 @@ export default function DeFiDashboard() {
                 fontSize={{ base: "2xs", sm: "xs" }} 
                 color="red.600"
                 textAlign="center"
-                minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+                minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Curve TVL</Text>
@@ -657,9 +643,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="red.600"
                 textAlign="center"
-                minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Curve 24hr Vol</Text>
@@ -672,9 +658,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="orange.600"
                 textAlign="center"
-                minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Uniswap TVL</Text>
@@ -687,9 +673,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="orange.600"
                 textAlign="center"
-                minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Uniswap 24hr Vol</Text>
@@ -702,9 +688,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="green.600"
                 textAlign="center"
-                minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-                w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+                minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+                w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Balancer TVL</Text>
@@ -717,9 +703,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="green.600"
                 textAlign="center"
-                minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Balancer 24hr Vol</Text>
@@ -732,9 +718,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="purple.600"
                 textAlign="center"
-                minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-                w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+                minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+                w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Sushi TVL</Text>
@@ -747,9 +733,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="purple.600"
                 textAlign="center"
-                minW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
-                maxW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
-                w={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
+                minW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
+                maxW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
+                w={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Sushi 24hr Vol</Text>
@@ -763,9 +749,9 @@ export default function DeFiDashboard() {
                 color="blue.600" 
                 fontWeight="bold"
                 textAlign="center"
-                minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-                w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+                minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+                w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Mainnet DEX TVL</Text>
@@ -778,9 +764,9 @@ export default function DeFiDashboard() {
                 fontSize="xs" 
                 color="blue.600"
                 textAlign="center"
-                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>24hr DEX volume</Text>
@@ -792,9 +778,9 @@ export default function DeFiDashboard() {
               <Th 
                 fontSize="xs"
                 textAlign="center"
-                minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-                w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+                minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>DEX Liquidity Turnover</Text>
@@ -813,9 +799,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="Protocol team" 
                 fontSize="xs" 
-                minW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
-                maxW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
-                w={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
+                minW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
+                maxW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
+                w={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
               >
                 Next 12 mo Emissions / Unlocks
               </SortableHeader>
@@ -827,9 +813,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="Protocol team" 
                 fontSize="xs" 
-                minW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
-                maxW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
-                w={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
+                minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+                w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
               >
                 Next 12 month release %
               </SortableHeader>
@@ -841,9 +827,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="Protocol team" 
                 fontSize="xs" 
-                minW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
-                maxW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
-                w={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
+                minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+                w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
               >
                 Emissions, unlocks catalyst
               </SortableHeader>
@@ -856,9 +842,9 @@ export default function DeFiDashboard() {
                 onReset={handleReset} 
                 dataSource="DeFiLlama API" 
                 fontSize="xs"
-                minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-                w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+                minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
               >
                 Protocol TVL<br/>(exclude staking)
               </SortableHeader>

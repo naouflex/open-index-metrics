@@ -263,9 +263,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
           boxShadow="2px 0 4px rgba(0,0,0,0.1)"
           _hover={{ bg: hoverBgColor }}
         whiteSpace="nowrap"
-        minW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
-        maxW={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
-        w={{ base: "100px", sm: "130px", md: "170px", lg: "200px" }}
+        minW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
+        maxW={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
+        w={{ base: "75px", sm: "90px", md: "110px", lg: "130px" }}
       >
         <VStack align="center" spacing={{ base: 0, md: 2 }} justify="center" h="100%">
           <VStack align="center" spacing={0}>
@@ -292,11 +292,11 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       {/* Links */}
       <Td 
-        minW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
-        maxW={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
-        w={{ base: "150px", sm: "150px", md: "150px", lg: "150px" }}
+        minW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
+        maxW={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
+        w={{ base: "100px", sm: "110px", md: "120px", lg: "120px" }}
       >
-        <HStack spacing={2} wrap="wrap" justify="center" align="center">
+        <HStack spacing={1} wrap="wrap" justify="center" align="center">
           {protocol.govContractAddress && (
             <Tooltip label="View on Etherscan" hasArrow placement="top">
               <Link href={`https://etherscan.io/address/${protocol.govContractAddress}`} isExternal>
@@ -357,9 +357,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Blockchain */}
       <Td
         textAlign="center"
-        minW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
-        maxW={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
-        w={{ base: "70px", sm: "80px", md: "90px", lg: "100px" }}
+        minW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
+        maxW={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
+        w={{ base: "55px", sm: "60px", md: "70px", lg: "75px" }}
       >
         <Badge colorScheme="blue" size="sm">
           {protocol.blockchain?.toUpperCase()}
@@ -369,9 +369,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* V1 Protocol Mainnet Launch */}
       <Td
         textAlign="center"
-        minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-        maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-        w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+        minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
       >
         <Text fontSize="xs">{protocol.mainnetLaunch}</Text>
       </Td>
@@ -379,9 +379,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Years Onchain */}
       <Td
         textAlign="center"
-        minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-        maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-        w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+        maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+        w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
       >
         <Text fontSize="sm">{yearsOnChain}y</Text>
       </Td>
@@ -389,9 +389,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* $OPEN Status */}
       <Td
         textAlign="center"
-        minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-        maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
-        w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+        minW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
+        maxW={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
+        w={{ base: "70px", sm: "75px", md: "85px", lg: "90px" }}
       >
         <Badge colorScheme={protocol.openStatus === 'current' ? 'green' : 'orange'} size="sm">
           {protocol.openStatus}
@@ -401,9 +401,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Market Metrics */}
       <Td
         textAlign="center"
-        minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-        maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-        w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+        minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <HStack spacing={1} justify="center">
@@ -420,9 +420,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-        maxW={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
-        w={{ base: "100px", sm: "120px", md: "140px", lg: "160px" }}
+        minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <Text fontSize="sm">{formatNumber(fdv)}</Text>
@@ -431,9 +431,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-        maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-        w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+        minW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
+        maxW={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
+        w={{ base: "85px", sm: "95px", md: "110px", lg: "120px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <Text fontSize="sm">{formatNumber(coinGeckoData.marketData.data?.volume_24h || 0)}</Text>
@@ -442,9 +442,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+        minW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
+        maxW={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
+        w={{ base: "95px", sm: "100px", md: "115px", lg: "130px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <Text fontSize="sm">{formatNumber(volume30d)}</Text>
@@ -453,9 +453,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-        maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
-        w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+        maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
+        w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <Text fontSize="sm" color={coinGeckoTVL > 0 ? "blue.500" : "gray.400"} fontWeight={coinGeckoTVL > 0 ? "semibold" : "normal"}>
@@ -467,9 +467,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Ratios */}
       <Td
         textAlign="center"
-        minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+        minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+        maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+        w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
       >
         <Text 
           fontSize="sm" 
@@ -482,9 +482,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+        minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+        maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+        w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
       >
         <Text 
           fontSize="sm" 
@@ -497,9 +497,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-        maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-        w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+        minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+        maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+        w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
       >
         <Text 
           fontSize="sm" 
@@ -513,9 +513,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Supply Metrics */}
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+        minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <Text fontSize="sm">{formatSupply(maxSupply)}</Text>
@@ -524,9 +524,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+        minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <HStack spacing={1} justify="center">
@@ -543,9 +543,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+        minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
       >
         <Skeleton isLoaded={!isLoading}>
           <HStack spacing={1} justify="center">
@@ -562,9 +562,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-        maxW={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
-        w={{ base: "120px", sm: "140px", md: "160px", lg: "180px" }}
+        minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+        maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
+        w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
       >
         <Text 
           fontSize="sm" 
@@ -575,21 +575,20 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
         </Text>
       </Td>
       
-              {/* Top 3 Exchanges */}
+      {/* Top 3 Exchanges */}
         <Td 
-          minW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
-          maxW={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
-          w={{ base: "300px", sm: "400px", md: "450px", lg: "500px" }}
+          minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+          maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+          w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
           overflow="hidden"
         >
           <Skeleton isLoaded={!coinGeckoData.topExchanges?.isLoading}>
             <Text 
               fontSize="xs" 
               color="gray.600"
-              isTruncated
-              whiteSpace="nowrap"
-              overflow="hidden"
-              textOverflow="ellipsis"
+              whiteSpace="normal"
+              wordBreak="break-word"
+              overflowWrap="anywhere"
             >
               {(() => {
                 const exchanges = coinGeckoData.topExchanges?.data?.exchanges;
@@ -606,7 +605,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
                     const volume = ex.volume_display || ex.volume_usd || '0';
                     return `${name} (${volume})`;
                   })
-                  .join(', ') || 'N/A';
+                  .join(', ');
               })()}
             </Text>
           </Skeleton>
@@ -615,9 +614,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* DEX Data */}
       <Td
         textAlign="center"
-        minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-        maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-        w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+        minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+        maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+        w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
       >
         <Skeleton isLoaded={!curveTVL.isLoading}>
           <Text fontSize="sm" color="red.600">{formatNumber(curveTVL.data || 0)}</Text>
@@ -626,9 +625,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-        maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-        w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+        minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+        maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+        w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
       >
         <Skeleton isLoaded={!curveVolume.isLoading}>
           <Text fontSize="sm" color="red.600">{formatNumber(curveVolume.data || 0)}</Text>
@@ -637,9 +636,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-        maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-        w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+        minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+        maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+        w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
       >
         <Skeleton isLoaded={!uniswapTVL.isLoading && (protocol.ticker !== 'INV' || (!invToken1Balance.isLoading && !invToken2Balance.isLoading))}>
           <HStack spacing={1} justify="center">
@@ -662,9 +661,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-        maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-        w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+        minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
       >
         <Skeleton isLoaded={!uniswapVolume.isLoading}>
           <Text fontSize="sm" color="orange.600">{formatNumber(uniswapVolume.data || 0)}</Text>
@@ -673,9 +672,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-        maxW={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
-        w={{ base: "90px", sm: "100px", md: "120px", lg: "140px" }}
+        minW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+        maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
+        w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
       >
         <Skeleton isLoaded={protocol.ticker === 'FRAX' ? !fraxswapTVLForFrax.isLoading : !balancerTVL.isLoading}>
           <HStack spacing={1} justify="center">
@@ -698,9 +697,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-        maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-        w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+        minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
       >
         <Skeleton isLoaded={protocol.ticker === 'FRAX' ? !fraxswapVolumeForFrax.isLoading : !balancerVolume.isLoading}>
           <HStack spacing={1} justify="center">
@@ -723,9 +722,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-        maxW={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
-        w={{ base: "80px", sm: "90px", md: "100px", lg: "120px" }}
+        minW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+        maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
+        w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
       >
         <Skeleton isLoaded={!sushiTVL.isLoading}>
           <Text fontSize="sm" color="purple.600">{formatNumber(sushiTVL.data || 0)}</Text>
@@ -734,9 +733,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
-        maxW={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
-        w={{ base: "100px", sm: "110px", md: "130px", lg: "150px" }}
+        minW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
+        maxW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
+        w={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
       >
         <Skeleton isLoaded={!sushiVolume.isLoading}>
           <Text fontSize="sm" color="purple.600">{formatNumber(sushiVolume.data || 0)}</Text>
@@ -745,27 +744,27 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-        maxW={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
-        w={{ base: "110px", sm: "120px", md: "140px", lg: "160px" }}
+        minW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
+        w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
       >
         <Text fontSize="sm" fontWeight="bold" color="blue.600">{formatNumber(totalDexTVL)}</Text>
       </Td>
       
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+        minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
       >
         <Text fontSize="sm" fontWeight="semibold" color="blue.600">{formatNumber(totalDexVolume)}</Text>
       </Td>
       
       <Td
         textAlign="center"
-        minW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        maxW={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
-        w={{ base: "130px", sm: "150px", md: "170px", lg: "190px" }}
+        minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+        maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+        w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
       >
         <Text 
           fontSize="sm" 
@@ -779,18 +778,18 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Emissions */}
       <Td 
         textAlign="center"
-        W={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
-        maxW={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
-        w={{ base: "150px", sm: "160px", md: "170px", lg: "180px" }}
+        minW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
+        maxW={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
+        w={{ base: "100px", sm: "110px", md: "120px", lg: "130px" }}
       >
         <Text fontSize="sm">{formatSupply(protocol.nextEmissions)}</Text>
       </Td>
       
       <Td 
         textAlign="center"
-        minW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
-        maxW={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
-        w={{ base: "130px", sm: "140px", md: "145px", lg: "150px" }}
+        minW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+        maxW={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
+        w={{ base: "90px", sm: "100px", md: "110px", lg: "120px" }}
       >
         <Text 
           fontSize="sm" 
@@ -803,18 +802,17 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       
       {/* Emissions Catalyst */}
       <Td 
-          minW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
-          maxW={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
-          w={{ base: "300px", sm: "350px", md: "375px", lg: "400px" }}
+          minW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+          maxW={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
+          w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
           overflow="hidden"
       >
         <Text 
           fontSize="xs" 
           color="gray.600"
-          isTruncated
-          whiteSpace="nowrap"
-          overflow="hidden"
-          textOverflow="ellipsis"
+          whiteSpace="normal"
+          wordBreak="break-word"
+          overflowWrap="anywhere"
         >
           {protocol.emissionsCatalyst || 'N/A'}
         </Text>
@@ -823,9 +821,9 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
       {/* Protocol TVL */}
       <Td
         textAlign="center"
-        minW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        maxW={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
-        w={{ base: "110px", sm: "130px", md: "150px", lg: "170px" }}
+        minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
       >
         <Skeleton isLoaded={!defiLlamaTVL.isLoading}>
           <Text fontSize="sm" fontWeight="semibold">{formatNumber(protocolTVL)}</Text>
