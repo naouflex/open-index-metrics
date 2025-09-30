@@ -249,19 +249,22 @@ export default function DeFiDashboard() {
     }
   );
   
-  // Calculate theoretical price (NAV - Net Asset Value)
+  // Calculate theoretical price (NAV - Net Asset Value) and protocol weights
   // Formula: Total Value of Holdings / Total Supply
+  // Weight = (Protocol Value / Total Value) * 100
   // 
   // Caching Strategy:
   // - Token balances: 2 min stale / 5 min cache (client) + 1 min (server)
   // - Token decimals: 24 hour stale / 7 day cache (never changes)
   // - Token prices: 1 min stale / 3 min cache (client) + 1 hour (server)
   // - Total supply: 5 min stale / 15 min cache (client) + 10 min (server)
-  const theoreticalPrice = useMemo(() => {
-    if (!allProtocolsLoaded) return null;
+  const { theoreticalPrice, protocolWeights } = useMemo(() => {
+    if (!allProtocolsLoaded) return { theoreticalPrice: null, protocolWeights: {} };
     
     let totalValue = 0;
     let allDataLoaded = true;
+    const weights = {};
+    const protocolValues = {};
     
     currentProtocols.forEach((protocol, index) => {
       const balance = openHoldingsBalances[index];
@@ -277,20 +280,29 @@ export default function DeFiDashboard() {
       if (balance.data && decimals.data && price.data) {
         const formattedBalance = balance.data / Math.pow(10, decimals.data);
         const tokenValue = formattedBalance * Number(price.data);
+        protocolValues[protocol.ticker] = tokenValue;
         totalValue += tokenValue;
       }
     });
     
     if (!allDataLoaded || openTotalSupply.isLoading || openDecimals.isLoading) {
-      return null;
+      return { theoreticalPrice: null, protocolWeights: {} };
     }
     
+    // Calculate weights as percentages of total value
+    if (totalValue > 0) {
+      Object.keys(protocolValues).forEach(ticker => {
+        weights[ticker] = (protocolValues[ticker] / totalValue) * 100;
+      });
+    }
+    
+    let price = null;
     if (openTotalSupply.data && openDecimals.data && openTotalSupply.data > 0) {
       const formattedSupply = openTotalSupply.data / Math.pow(10, openDecimals.data);
-      return totalValue / formattedSupply;
+      price = totalValue / formattedSupply;
     }
     
-    return null;
+    return { theoreticalPrice: price, protocolWeights: weights };
   }, [
     allProtocolsLoaded, 
     openHoldingsBalances, 
@@ -298,7 +310,8 @@ export default function DeFiDashboard() {
     allGovTokenPrices, 
     currentProtocolIndices,
     openTotalSupply,
-    openDecimals
+    openDecimals,
+    currentProtocols
   ]);
 
   useEffect(() => {
@@ -356,6 +369,11 @@ export default function DeFiDashboard() {
       const circToTotal = totalSupply > 0 ? circSupply / totalSupply : 0;
       const nextReleasePercentage = circSupply > 0 ? protocol.nextEmissions / circSupply : 0;
       
+      // Get prices and weight for sorting
+      const stablePrice = allStablePrices[index]?.data ? Number(allStablePrices[index].data) : 0;
+      const govTokenPrice = allGovTokenPrices[index]?.data ? Number(allGovTokenPrices[index].data) : 0;
+      const currentWeight = protocolWeights[protocol.ticker] || 0;
+      
       return {
         ...protocol,
         originalIndex: index,
@@ -363,6 +381,9 @@ export default function DeFiDashboard() {
           protocol: protocol.ticker,
           status: protocol.openStatus,
           years: yearsOnChain,
+          stablePrice,
+          govTokenPrice,
+          currentWeight,
           marketCap,
           fdv,
           volume24h,
@@ -381,7 +402,7 @@ export default function DeFiDashboard() {
         }
       };
     });
-  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax]);
+  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allStablePrices, allGovTokenPrices, protocolWeights]);
 
   // Sort protocols based on current sort configuration
   const sortedProtocols = useMemo(() => {
@@ -669,34 +690,48 @@ export default function DeFiDashboard() {
               >
                 $OPEN Status
               </SortableHeader>
-              <Th 
+              <SortableHeader 
+                column="stablePrice" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="DeFiLlama API" 
                 fontSize="xs"
                 textAlign="center"
                 minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
                 maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
                 w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
               >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Stable Price</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="DeFiLlama API" />
-                  </Box>
-                </Box>
-              </Th>
-              <Th 
+                Stable Price
+              </SortableHeader>
+              <SortableHeader 
+                column="govTokenPrice" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="DeFiLlama API" 
                 fontSize="xs"
                 textAlign="center"
                 minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
                 maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
                 w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
               >
-                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                  <Text mb={2}>Gov Token Price</Text>
-                  <Box position="absolute" bottom={1}>
-                    <DataSourceBadge source="DeFiLlama API" />
-                  </Box>
-                </Box>
-              </Th>
+                Gov Token Price
+              </SortableHeader>
+              <SortableHeader 
+                column="currentWeight" 
+                currentSort={sortConfig} 
+                onSort={handleSort} 
+                onReset={handleReset} 
+                dataSource="calc" 
+                fontSize="xs"
+                textAlign="center"
+                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+              >
+                Current Weight %
+              </SortableHeader>
               
               {/* Market Metrics */}
               <SortableHeader 
@@ -1110,6 +1145,7 @@ export default function DeFiDashboard() {
                 key={protocol.ticker}
                 protocol={protocol}
                 shouldLoad={loadedProtocols.has(protocol.originalIndex)}
+                currentWeight={protocolWeights[protocol.ticker]}
               />
             ))}
           </Tbody>

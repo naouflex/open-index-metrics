@@ -37,7 +37,7 @@ import SpecialTreatmentBadge from './SpecialTreatmentBadge.jsx';
 
 // ================= PROTOCOL ROW COMPONENT =================
 
-export default function ProtocolRow({ protocol, shouldLoad = false }) {
+export default function ProtocolRow({ protocol, shouldLoad = false, currentWeight }) {
   // Only load data if shouldLoad is true (staggered loading)
   const coinGeckoData = useCoinGeckoComplete(protocol.coingeckoId, { enabled: shouldLoad });
   const defiLlamaTVL = useDefiLlamaTVL(protocol.defiLlamaSlug, { enabled: shouldLoad });
@@ -138,7 +138,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
         <Td>
           <Skeleton height="20px" width="90px" />
         </Td>
-        <Td colSpan={31}>
+        <Td colSpan={32}>
           <Skeleton height="20px" />
         </Td>
       </Tr>
@@ -453,6 +453,24 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
             </Text>
           </VStack>
         </Skeleton>
+      </Td>
+      
+      {/* Current Weight % */}
+      <Td
+        textAlign="center"
+        minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+      >
+        {protocol.openStatus === 'current' ? (
+          <Text fontSize="sm" fontWeight="bold" color={useColorModeValue('blue.600', 'blue.400')}>
+            {currentWeight !== undefined && !isNaN(currentWeight) 
+              ? `${currentWeight.toFixed(2)}%` 
+              : 'Calculating...'}
+          </Text>
+        ) : (
+          <Text fontSize="sm" color="gray.500">-</Text>
+        )}
       </Td>
       
       {/* Market Metrics */}

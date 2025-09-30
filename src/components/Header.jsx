@@ -198,13 +198,20 @@ export default function Header() {
       <Container maxW="none" px={{ base: 4, md: 6 }} py={{ base: 1, md: 2 }}>
         <Flex justify="space-between" align="center" minH={{ base: "50px", sm: "55px", md: "60px" }} position="relative">
           {/* Logo on the left */}
-          <Image 
-            src="/logo.svg" 
-            alt="Open Index Logo" 
-            height={{ base: "30px", sm: "35px", md: "40px" }}
-            width={{ base: "30px", sm: "35px", md: "40px" }}
-            flexShrink={0}
-          />
+          <Link 
+            href="https://openstablecoinindex.com/" 
+            isExternal
+            _hover={{ opacity: 0.8 }}
+            transition="opacity 0.2s"
+          >
+            <Image 
+              src="/logo.svg" 
+              alt="Open Index Logo" 
+              height={{ base: "30px", sm: "35px", md: "40px" }}
+              width={{ base: "30px", sm: "35px", md: "40px" }}
+              flexShrink={0}
+            />
+          </Link>
           
           {/* Title centered both horizontally and vertically */}
           <Box 
