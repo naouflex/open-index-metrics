@@ -475,6 +475,24 @@ export default function DeFiDashboard() {
       const govTokenPrice = allGovTokenPrices[index]?.data ? Number(allGovTokenPrices[index].data) : 0;
       const currentWeight = protocolWeights[protocol.ticker] || 0;
       
+      // Get DEX data for sorting
+      const curveTVL = allCurveTVL[index]?.data || 0;
+      const curveVolume = allCurveVolume[index]?.data || 0;
+      const uniswapTVL = allUniswapTVL[index]?.data || 0;
+      const uniswapVolume = allUniswapVolume[index]?.data || 0;
+      const balancerTVL = protocol.ticker === 'FRAX' 
+        ? (fraxswapTVLForFrax?.data || 0)
+        : (allBalancerTVL[index]?.data || 0);
+      const balancerVolume = protocol.ticker === 'FRAX' 
+        ? (fraxswapVolumeForFrax?.data || 0)
+        : (allBalancerVolume[index]?.data || 0);
+      const sushiTVL = allSushiTVL[index]?.data || 0;
+      const sushiVolume = allSushiVolume[index]?.data || 0;
+      
+      const mainnetDexTVL = curveTVL + uniswapTVL + balancerTVL + sushiTVL;
+      const dexVolume24h = curveVolume + uniswapVolume + balancerVolume + sushiVolume;
+      const dexLiquidityTurnover = mainnetDexTVL > 0 ? dexVolume24h / mainnetDexTVL : 0;
+      
       return {
         ...protocol,
         originalIndex: index,
@@ -497,13 +515,24 @@ export default function DeFiDashboard() {
           totalSupply,
           circSupply,
           circToTotal,
+          curveTVL,
+          curveVolume,
+          uniswapTVL,
+          uniswapVolume,
+          balancerTVL,
+          balancerVolume,
+          sushiTVL,
+          sushiVolume,
+          mainnetDexTVL,
+          dexVolume24h,
+          dexLiquidityTurnover,
           nextEmissions: protocol.nextEmissions,
           nextReleasePercentage,
           protocolTVL
         }
       };
     });
-  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allStablePrices, allGovTokenPrices, protocolWeights]);
+  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allStablePrices, allGovTokenPrices, protocolWeights, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume]);
 
   // Sort protocols based on current sort configuration
   const sortedProtocols = useMemo(() => {
@@ -1076,7 +1105,12 @@ export default function DeFiDashboard() {
               
               {/* DEX Data */}
               {visibleColumns.curveTVL && (
-                <Th 
+                <SortableHeader 
+                  column="curveTVL"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Curve API"
                   fontSize={{ base: "2xs", sm: "xs" }} 
                   color="red.600"
                   textAlign="center"
@@ -1084,16 +1118,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
                   w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Curve TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Curve API" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Curve TVL
+                </SortableHeader>
               )}
               {visibleColumns.curveVolume && (
-                <Th 
+                <SortableHeader 
+                  column="curveVolume"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Curve API"
                   fontSize="xs" 
                   color="red.600"
                   textAlign="center"
@@ -1101,16 +1135,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
                   w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Curve 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Curve API" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Curve 24hr Vol
+                </SortableHeader>
               )}
               {visibleColumns.uniswapTVL && (
-                <Th 
+                <SortableHeader 
+                  column="uniswapTVL"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Uniswap Subgraph"
                   fontSize="xs" 
                   color="orange.600"
                   textAlign="center"
@@ -1118,16 +1152,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
                   w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Uniswap TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Uniswap Subgraph" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Uniswap TVL
+                </SortableHeader>
               )}
               {visibleColumns.uniswapVolume && (
-                <Th 
+                <SortableHeader 
+                  column="uniswapVolume"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Uniswap Subgraph"
                   fontSize="xs" 
                   color="orange.600"
                   textAlign="center"
@@ -1135,16 +1169,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
                   w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Uniswap 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Uniswap Subgraph" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Uniswap 24hr Vol
+                </SortableHeader>
               )}
               {visibleColumns.balancerTVL && (
-                <Th 
+                <SortableHeader 
+                  column="balancerTVL"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Balancer & Fraxswap Subgraph"
                   fontSize="xs" 
                   color="green.600"
                   textAlign="center"
@@ -1152,16 +1186,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
                   w={{ base: "65px", sm: "75px", md: "90px", lg: "100px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Balancer TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Balancer TVL
+                </SortableHeader>
               )}
               {visibleColumns.balancerVolume && (
-                <Th 
+                <SortableHeader 
+                  column="balancerVolume"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Balancer & Fraxswap Subgraph"
                   fontSize="xs" 
                   color="green.600"
                   textAlign="center"
@@ -1169,16 +1203,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
                   w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Balancer 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Balancer & Fraxswap Subgraph" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Balancer 24hr Vol
+                </SortableHeader>
               )}
               {visibleColumns.sushiTVL && (
-                <Th 
+                <SortableHeader 
+                  column="sushiTVL"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Sushiswap Subgraph"
                   fontSize="xs" 
                   color="purple.600"
                   textAlign="center"
@@ -1186,16 +1220,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
                   w={{ base: "60px", sm: "65px", md: "75px", lg: "85px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Sushi TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Sushiswap Subgraph" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Sushi TVL
+                </SortableHeader>
               )}
               {visibleColumns.sushiVolume && (
-                <Th 
+                <SortableHeader 
+                  column="sushiVolume"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="Sushiswap Subgraph"
                   fontSize="xs" 
                   color="purple.600"
                   textAlign="center"
@@ -1203,16 +1237,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
                   w={{ base: "75px", sm: "85px", md: "95px", lg: "105px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Sushi 24hr Vol</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="Sushiswap Subgraph" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Sushi 24hr Vol
+                </SortableHeader>
               )}
               {visibleColumns.mainnetDexTVL && (
-                <Th 
+                <SortableHeader 
+                  column="mainnetDexTVL"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
                   fontSize="xs" 
                   color="blue.600" 
                   fontWeight="bold"
@@ -1221,16 +1255,16 @@ export default function DeFiDashboard() {
                   maxW={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
                   w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>Mainnet DEX TVL</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="calc" />
-                    </Box>
-                  </Box>
-                </Th>
+                  Mainnet DEX TVL
+                </SortableHeader>
               )}
               {visibleColumns.dexVolume24h && (
-                <Th 
+                <SortableHeader 
+                  column="dexVolume24h"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
                   fontSize="xs" 
                   color="blue.600"
                   textAlign="center"
@@ -1238,29 +1272,24 @@ export default function DeFiDashboard() {
                   maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
                   w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>24hr DEX volume</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="calc" />
-                    </Box>
-                  </Box>
-                </Th>
+                  24hr DEX volume
+                </SortableHeader>
               )}
               {visibleColumns.dexLiquidityTurnover && (
-                <Th 
+                <SortableHeader 
+                  column="dexLiquidityTurnover"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
                   fontSize="xs"
                   textAlign="center"
                   minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
                   maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
                   w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
                 >
-                  <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
-                    <Text mb={2}>DEX Liquidity Turnover</Text>
-                    <Box position="absolute" bottom={1}>
-                      <DataSourceBadge source="calc" />
-                    </Box>
-                  </Box>
-                </Th>
+                  DEX Liquidity Turnover
+                </SortableHeader>
               )}
               
               {/* Emissions */}
