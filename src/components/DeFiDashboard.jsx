@@ -151,6 +151,15 @@ export default function DeFiDashboard() {
     )
   );
 
+  // Load all governance token prices from DeFiLlama
+  const allGovTokenPrices = protocols.map(protocol => 
+    useTokenPrice(
+      protocol.govContractAddress,
+      protocol.blockchain,
+      { enabled: allProtocolsLoaded }
+    )
+  );
+
   useEffect(() => {
     // Load protocols one by one with short delays (Pro API can handle faster loading)
     const loadProtocolsSequentially = async () => {
@@ -284,7 +293,8 @@ export default function DeFiDashboard() {
       allBalancerVolume,
       allSushiTVL,
       allSushiVolume,
-      allStablePrices
+      allStablePrices,
+      allGovTokenPrices
     );
   };
 
@@ -463,6 +473,20 @@ export default function DeFiDashboard() {
               >
                 <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
                   <Text mb={2}>Stable Price</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="DeFiLlama API" />
+                  </Box>
+                </Box>
+              </Th>
+              <Th 
+                fontSize="xs"
+                textAlign="center"
+                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Gov Token Price</Text>
                   <Box position="absolute" bottom={1}>
                     <DataSourceBadge source="DeFiLlama API" />
                   </Box>

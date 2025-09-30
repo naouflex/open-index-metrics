@@ -107,6 +107,13 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
     { enabled: shouldLoad && protocol.stableAddress !== null }
   );
   
+  // Get governance token price from DeFiLlama
+  const govTokenPrice = useTokenPrice(
+    protocol.govContractAddress,
+    protocol.blockchain,
+    { enabled: shouldLoad }
+  );
+  
   // If not loading yet, show skeleton
   if (!shouldLoad) {
     return (
@@ -131,7 +138,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
         <Td>
           <Skeleton height="20px" width="90px" />
         </Td>
-        <Td colSpan={30}>
+        <Td colSpan={31}>
           <Skeleton height="20px" />
         </Td>
       </Tr>
@@ -427,6 +434,25 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
         ) : (
           <Text fontSize="sm" color="gray.500">N/A</Text>
         )}
+      </Td>
+      
+      {/* Governance Token Price */}
+      <Td
+        textAlign="center"
+        minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+      >
+        <Skeleton isLoaded={!govTokenPrice.isLoading}>
+          <VStack spacing={0} align="center">
+            <Text fontSize="sm" fontWeight="semibold">
+              {protocol.ticker}
+            </Text>
+            <Text fontSize="sm">
+              {govTokenPrice.data ? `$${Number(govTokenPrice.data).toFixed(4)}` : 'N/A'}
+            </Text>
+          </VStack>
+        </Skeleton>
       </Td>
       
       {/* Market Metrics */}
