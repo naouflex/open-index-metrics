@@ -114,7 +114,7 @@ export const protocols = [
     emissionsCatalyst: "emissions only set to last 3 years as well so won't be any more at the end of 2026"
   },
   {
-    ticker: "FRAX",
+    ticker: "FXS",
     name: "Frax Finance",
     govContractAddress: "0x3432b6a60d23ca0dfca7761b7ab56459d9c964d0",
     stableAddress: "0x853d955acef822db058eb8505911ed77f175b99e", // FRAX
