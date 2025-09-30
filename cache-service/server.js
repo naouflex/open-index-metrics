@@ -176,6 +176,7 @@ class CacheManager {
       'protocol-info': 3600, // 24 hours - protocol info changes infrequently
       'token-price': 3600, // 5 minutes - prices change frequently
       'protocol-tvl': 3600, // 30 minutes - TVL changes moderately
+      'protocol-revenue': 3600, // 1 hour - revenue changes moderately
       'all-protocols': 3600, // 12 hours - protocol list changes infrequently
       'market-data': 3600, // 30 minutes - market data changes moderately
       'volume-data': 3600, // 1 hour - volume data changes hourly
@@ -823,6 +824,27 @@ app.get('/api/defillama/protocol-tvl-by-chain/:protocolSlug', async (req, res) =
   } catch (error) {
     logger.error('DeFiLlama protocol TVL by chain error:', error);
     res.status(500).json({ error: 'Failed to fetch protocol TVL by chain' });
+  }
+});
+
+// getProtocolRevenue -> /api/defillama/protocol-revenue/:protocolSlug
+app.get('/api/defillama/protocol-revenue/:protocolSlug', async (req, res) => {
+  try {
+    const { protocolSlug } = req.params;
+    const cacheKey = `defillama:revenue:${protocolSlug}`;
+    
+    const data = await safeExternalFetch(
+      cacheKey,
+      () => defiLlamaFetcher.fetchProtocolRevenue(protocolSlug),
+      defiLlamaCircuitBreaker,
+      10000,
+      'protocol-revenue'
+    );
+    
+    res.json(data);
+  } catch (error) {
+    logger.error('DeFiLlama protocol revenue error:', error);
+    res.status(500).json({ error: 'Failed to fetch protocol revenue' });
   }
 });
 

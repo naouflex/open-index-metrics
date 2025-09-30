@@ -2,7 +2,7 @@ import { calculateYearsOnChain } from '../config/protocols.js';
 
 // ================= CSV EXPORT FUNCTION =================
 
-export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allStablePrices, allGovTokenPrices) {
+export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allStablePrices, allGovTokenPrices, allProtocolRevenue) {
   const headers = [
     'Protocol',
     'Name',
@@ -41,7 +41,16 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     'Next 12mo Emissions',
     'Next 12mo Release %',
     'Emissions Catalyst',
-    'Protocol TVL'
+    'Protocol TVL',
+    'Revenue (24h)',
+    'Revenue (7d avg)',
+    'Revenue (All Time)',
+    'Revenue (Annualized from 24h)',
+    'Revenue (Annualized from 7d avg)',
+    'Revenue / Market Cap (%, 24h basis)',
+    'Revenue / TVL (%, 24h basis)',
+    'Revenue / Market Cap (%, 7d basis)',
+    'Revenue / TVL (%, 7d basis)'
   ];
 
   const csvContent = [headers];
@@ -117,6 +126,20 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     // Current weight is only calculated for 'current' protocols
     const currentWeight = protocol.openStatus === 'current' ? protocol.sortValues?.currentWeight || 0 : 0;
 
+    // Get revenue data
+    const revenueData = allProtocolRevenue[index];
+    const revenue24h = revenueData?.data?.total24h || 0;
+    const revenue7d = revenueData?.data?.total7d ? revenueData.data.total7d / 7 : 0;
+    const revenueAllTime = revenueData?.data?.totalAllTime || 0;
+    const revenueAnnualized24h = revenue24h * 365;
+    const revenueAnnualized7d = revenue7d * 365;
+    
+    // Calculate revenue ratios (both 24h and 7d basis)
+    const revenueToMarketCap24h = marketCap > 0 ? (revenueAnnualized24h / marketCap) * 100 : 0;
+    const revenueToTVL24h = protocolTVL > 0 ? (revenueAnnualized24h / protocolTVL) * 100 : 0;
+    const revenueToMarketCap7d = marketCap > 0 ? (revenueAnnualized7d / marketCap) * 100 : 0;
+    const revenueToTVL7d = protocolTVL > 0 ? (revenueAnnualized7d / protocolTVL) * 100 : 0;
+
     const row = [
       protocol.ticker,
       protocol.name,
@@ -155,7 +178,16 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
       protocol.nextEmissions,
       nextReleasePercentage.toFixed(2),
       protocol.emissionsCatalyst || 'N/A',
-      protocolTVL
+      protocolTVL,
+      revenue24h,
+      revenue7d,
+      revenueAllTime,
+      revenueAnnualized24h,
+      revenueAnnualized7d,
+      revenueToMarketCap24h.toFixed(2),
+      revenueToTVL24h.toFixed(2),
+      revenueToMarketCap7d.toFixed(2),
+      revenueToTVL7d.toFixed(2)
     ];
 
     csvContent.push(row);

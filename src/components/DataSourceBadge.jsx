@@ -16,7 +16,7 @@ import { InfoIcon } from '@chakra-ui/icons';
 
 // ================= DATA SOURCE BADGE COMPONENT =================
 
-export default function DataSourceBadge({ source }) {
+export default function DataSourceBadge({ source, disclaimer }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   
   if (!source) return null;
@@ -30,11 +30,22 @@ export default function DataSourceBadge({ source }) {
     if (source.toLowerCase().includes('verify')) return 'red';
     return 'gray';
   };
+  
+  const tooltipLabel = disclaimer 
+    ? `Data Source: ${source}\n\n⚠️ ${disclaimer}`
+    : `Data Source: ${source}`;
 
   return (
     <>
       {/* Desktop: Show tooltip on hover */}
-      <Tooltip label={`Data Source: ${source}`} hasArrow placement="top" display={{ base: "none", md: "block" }}>
+      <Tooltip 
+        label={tooltipLabel} 
+        hasArrow 
+        placement="top" 
+        display={{ base: "none", md: "block" }}
+        whiteSpace="pre-wrap"
+        maxW="300px"
+      >
         <Badge 
           colorScheme={getColorScheme(source)} 
           size="xs" 
@@ -73,7 +84,12 @@ export default function DataSourceBadge({ source }) {
           <ModalHeader fontSize="lg">Data Source</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>{source}</Text>
+            <Text mb={disclaimer ? 3 : 0}>{source}</Text>
+            {disclaimer && (
+              <Badge colorScheme="yellow" p={2} fontSize="xs" whiteSpace="normal" display="block">
+                ⚠️ {disclaimer}
+              </Badge>
+            )}
           </ModalBody>
           <ModalFooter>
             <Button onClick={onClose} size="sm">Close</Button>

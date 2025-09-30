@@ -214,6 +214,23 @@ export async function getProtocolTVLByChain(protocolSlug) {
   return response.data;
 }
 
+export async function getProtocolRevenue(protocolSlug) {
+  try {
+    const response = await cacheApi.get(`/defillama/protocol-revenue/${protocolSlug}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching protocol revenue for ${protocolSlug}:`, error);
+    return {
+      total24h: 0,
+      total48hto24h: 0,
+      total7d: 0,
+      totalAllTime: 0,
+      change_1d: 0,
+      error: error.message
+    };
+  }
+}
+
 // ================= ETHEREUM CACHE FUNCTIONS =================
 
 export async function getTokenBalance(tokenAddress, holderAddress) {

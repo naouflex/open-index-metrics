@@ -4,7 +4,8 @@ import {
   getTokenPrice,
   getMultipleTokenPrices,
   getProtocolInfo,
-  getAllProtocols
+  getAllProtocols,
+  getProtocolRevenue
 } from '../services/cache-client.js';
 
 // ================= DEFILLAMA HOOKS =================
@@ -206,5 +207,24 @@ export function useProtocolSearch(searchTerm) {
     enabled: !!searchTerm && !!allProtocolsQuery.data,
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+/**
+ * Hook to get protocol revenue/fees data from DeFiLlama
+ * @param {string} protocolSlug - The DeFiLlama protocol slug
+ * @param {object} options - Query options
+ * @returns {object} Query result with revenue data
+ */
+export function useProtocolRevenue(protocolSlug, options = {}) {
+  return useQuery({
+    queryKey: ['defillama', 'revenue', protocolSlug?.toLowerCase()],
+    queryFn: () => getProtocolRevenue(protocolSlug),
+    enabled: !!protocolSlug,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    retryDelay: 1000,
+    ...options
   });
 } 

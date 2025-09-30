@@ -16,7 +16,8 @@ export default function SortableHeader({
   currentSort, 
   onSort, 
   onReset, 
-  dataSource, 
+  dataSource,
+  disclaimer,
   children, 
   centerVertically = false, 
   ...props 
@@ -51,7 +52,7 @@ export default function SortableHeader({
           )}
         </HStack>
         <Box position="absolute" bottom={1}>
-          <DataSourceBadge source={dataSource} />
+          <DataSourceBadge source={dataSource} disclaimer={disclaimer} />
         </Box>
       </Box>
     </Th>

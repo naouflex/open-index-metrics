@@ -36,7 +36,8 @@ import {
   useTokenPrice,
   useTokenBalance,
   useTokenDecimals,
-  useTokenTotalSupply
+  useTokenTotalSupply,
+  useProtocolRevenue
 } from '../hooks/index.js';
 
 import ProtocolRow from './ProtocolRow.jsx';
@@ -84,7 +85,16 @@ const COLUMN_DEFINITIONS = {
   nextEmissions: 'Next 12 mo Emissions / Unlocks',
   nextReleasePercentage: 'Next 12 month release %',
   emissionsCatalyst: 'Emissions, unlocks catalyst',
-  protocolTVL: 'Protocol TVL'
+  protocolTVL: 'Protocol TVL',
+  revenue24h: 'Revenue (24h)',
+  revenue7d: 'Revenue (7d avg)',
+  revenueAllTime: 'Revenue (All Time)',
+  revenueAnnualized24h: 'Revenue (Annualized from 24h)',
+  revenueAnnualized7d: 'Revenue (Annualized from 7d avg)',
+  revenueToMarketCap24h: 'Revenue / Market Cap (%, 24h basis)',
+  revenueToTVL24h: 'Revenue / TVL (%, 24h basis)',
+  revenueToMarketCap7d: 'Revenue / Market Cap (%, 7d basis)',
+  revenueToTVL7d: 'Revenue / TVL (%, 7d basis)'
 };
 
 // ================= MAIN DASHBOARD COMPONENT =================
@@ -165,6 +175,11 @@ export default function DeFiDashboard() {
   );
   const allDefiLlamaTVL = protocols.map(protocol => 
     useDefiLlamaTVL(protocol.defiLlamaSlug, { enabled: allProtocolsLoaded })
+  );
+  
+  // Load revenue data for all protocols
+  const allProtocolRevenue = protocols.map(protocol =>
+    useProtocolRevenue(protocol.defiLlamaSlug, { enabled: allProtocolsLoaded })
   );
   
   // Load FXN holder balance for sorting (only for FXN protocol)
@@ -493,6 +508,20 @@ export default function DeFiDashboard() {
       const dexVolume24h = curveVolume + uniswapVolume + balancerVolume + sushiVolume;
       const dexLiquidityTurnover = mainnetDexTVL > 0 ? dexVolume24h / mainnetDexTVL : 0;
       
+      // Get revenue data
+      const revenueData = allProtocolRevenue[index];
+      const revenue24h = revenueData?.data?.total24h || 0;
+      const revenue7d = revenueData?.data?.total7d ? revenueData.data.total7d / 7 : 0; // Convert to daily average
+      const revenueAllTime = revenueData?.data?.totalAllTime || 0;
+      const revenueAnnualized24h = revenue24h * 365;
+      const revenueAnnualized7d = revenue7d * 365;
+      
+      // Calculate revenue ratios (both 24h and 7d basis)
+      const revenueToMarketCap24h = marketCap > 0 ? revenueAnnualized24h / marketCap : 0;
+      const revenueToTVL24h = protocolTVL > 0 ? revenueAnnualized24h / protocolTVL : 0;
+      const revenueToMarketCap7d = marketCap > 0 ? revenueAnnualized7d / marketCap : 0;
+      const revenueToTVL7d = protocolTVL > 0 ? revenueAnnualized7d / protocolTVL : 0;
+      
       return {
         ...protocol,
         originalIndex: index,
@@ -528,11 +557,20 @@ export default function DeFiDashboard() {
           dexLiquidityTurnover,
           nextEmissions: protocol.nextEmissions,
           nextReleasePercentage,
-          protocolTVL
+          protocolTVL,
+          revenue24h,
+          revenue7d,
+          revenueAllTime,
+          revenueAnnualized24h,
+          revenueAnnualized7d,
+          revenueToMarketCap24h,
+          revenueToTVL24h,
+          revenueToMarketCap7d,
+          revenueToTVL7d
         }
       };
     });
-  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allStablePrices, allGovTokenPrices, protocolWeights, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume]);
+  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allStablePrices, allGovTokenPrices, protocolWeights, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allProtocolRevenue]);
 
   // Sort protocols based on current sort configuration
   const sortedProtocols = useMemo(() => {
@@ -591,7 +629,8 @@ export default function DeFiDashboard() {
       allSushiTVL,
       allSushiVolume,
       allStablePrices,
-      allGovTokenPrices
+      allGovTokenPrices,
+      allProtocolRevenue
     );
   };
 
@@ -1356,6 +1395,165 @@ export default function DeFiDashboard() {
                   w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
                 >
                   Protocol TVL<br/>(exclude staking)
+                </SortableHeader>
+              )}
+              
+              {/* Revenue */}
+              {visibleColumns.revenue24h && (
+                <SortableHeader 
+                  column="revenue24h"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="DeFiLlama API"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                  w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+                >
+                  Revenue (24h)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenue7d && (
+                <SortableHeader 
+                  column="revenue7d"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="DeFiLlama API"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "90px", sm: "105px", md: "120px", lg: "130px" }}
+                  maxW={{ base: "90px", sm: "105px", md: "120px", lg: "130px" }}
+                  w={{ base: "90px", sm: "105px", md: "120px", lg: "130px" }}
+                >
+                  Revenue (7d avg)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenueAllTime && (
+                <SortableHeader 
+                  column="revenueAllTime"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="DeFiLlama API"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "95px", sm: "110px", md: "125px", lg: "140px" }}
+                  maxW={{ base: "95px", sm: "110px", md: "125px", lg: "140px" }}
+                  w={{ base: "95px", sm: "110px", md: "125px", lg: "140px" }}
+                >
+                  Revenue (All Time)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenueAnnualized24h && (
+                <SortableHeader 
+                  column="revenueAnnualized24h"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  color="green.600"
+                  fontWeight="bold"
+                  minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                >
+                  Revenue (Annualized from 24h)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenueAnnualized7d && (
+                <SortableHeader 
+                  column="revenueAnnualized7d"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  color="green.600"
+                  fontWeight="bold"
+                  minW={{ base: "110px", sm: "125px", md: "140px", lg: "155px" }}
+                  maxW={{ base: "110px", sm: "125px", md: "140px", lg: "155px" }}
+                  w={{ base: "110px", sm: "125px", md: "140px", lg: "155px" }}
+                >
+                  Revenue (Annualized from 7d avg)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenueToMarketCap24h && (
+                <SortableHeader 
+                  column="revenueToMarketCap24h"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                >
+                  Revenue / Market Cap (%, 24h basis)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenueToTVL24h && (
+                <SortableHeader 
+                  column="revenueToTVL24h"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                >
+                  Revenue / TVL (%, 24h basis)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenueToMarketCap7d && (
+                <SortableHeader 
+                  column="revenueToMarketCap7d"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                >
+                  Revenue / Market Cap (%, 7d basis)
+                </SortableHeader>
+              )}
+              {visibleColumns.revenueToTVL7d && (
+                <SortableHeader 
+                  column="revenueToTVL7d"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                  onReset={handleReset}
+                  dataSource="calc"
+                  disclaimer="Revenue figures primarily include protocol fees and may not capture all income streams (e.g., off-chain revenue, token emissions value)"
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                  w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+                >
+                  Revenue / TVL (%, 7d basis)
                 </SortableHeader>
               )}
             </Tr>

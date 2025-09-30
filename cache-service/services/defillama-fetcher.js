@@ -378,4 +378,49 @@ export class DefiLlamaFetcher {
       return {};
     }
   }
+
+  async fetchProtocolRevenue(protocolSlug) {
+    const requestKey = generateCacheKey('defillama', 'protocol-revenue', { slug: protocolSlug });
+    
+    return this.requestQueue.enqueue(requestKey, async () => {
+      const url = `${this.baseUrl}/summary/fees/${protocolSlug}`;
+      console.log(`Fetching DeFiLlama revenue for: ${protocolSlug}`);
+      
+      const response = await axios.get(url, { 
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'OpenDashboard/1.0',
+          'Accept': 'application/json'
+        }
+      });
+      
+      const data = response.data;
+      
+      const result = {
+        protocol: protocolSlug,
+        name: data.name || protocolSlug,
+        total24h: data.total24h || 0,
+        total48hto24h: data.total48hto24h || 0,
+        total7d: data.total7d || 0,
+        totalAllTime: data.totalAllTime || 0,
+        change_1d: data.change_1d || 0,
+        fetched_at: new Date().toISOString()
+      };
+      
+      console.log(`Revenue fetched for ${protocolSlug}: 24h=$${result.total24h.toLocaleString()}`);
+      return result;
+    }).catch(error => {
+      console.error(`Error fetching DeFiLlama revenue for ${protocolSlug}:`, error.message);
+      return {
+        protocol: protocolSlug,
+        total24h: 0,
+        total48hto24h: 0,
+        total7d: 0,
+        totalAllTime: 0,
+        change_1d: 0,
+        error: error.message,
+        fetched_at: new Date().toISOString()
+      };
+    });
+  }
 } 

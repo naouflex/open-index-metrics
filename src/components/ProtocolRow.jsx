@@ -30,7 +30,8 @@ import {
   useFraxswapTVL,
   useFraxswap24hVolume,
   useTokenBalanceWithUSD,
-  useTokenPrice
+  useTokenPrice,
+  useProtocolRevenue
 } from '../hooks/index.js';
 import { getColorForMetric } from '../utils/colorHelpers.js';
 import SpecialTreatmentBadge from './SpecialTreatmentBadge.jsx';
@@ -41,6 +42,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false, currentWeigh
   // Only load data if shouldLoad is true (staggered loading)
   const coinGeckoData = useCoinGeckoComplete(protocol.coingeckoId, { enabled: shouldLoad });
   const defiLlamaTVL = useDefiLlamaTVL(protocol.defiLlamaSlug, { enabled: shouldLoad });
+  const protocolRevenue = useProtocolRevenue(protocol.defiLlamaSlug, { enabled: shouldLoad });
 
   // DEX TVL hooks - also conditionally enabled
   const curveTVL = useCurveTVL(protocol.govContractAddress, { enabled: shouldLoad });
@@ -979,6 +981,136 @@ export default function ProtocolRow({ protocol, shouldLoad = false, currentWeigh
           <Skeleton isLoaded={!defiLlamaTVL.isLoading}>
             <Text fontSize="sm" fontWeight="semibold">{formatNumber(protocolTVL)}</Text>
           </Skeleton>
+        </Td>
+      )}
+      
+      {/* Revenue */}
+      {visibleColumns.revenue24h && (
+        <Td
+          textAlign="center"
+          minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+          maxW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+          w={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
+        >
+          <Skeleton isLoaded={!protocolRevenue.isLoading}>
+            <Text fontSize="sm">{formatNumber(protocolRevenue.data?.total24h || 0)}</Text>
+          </Skeleton>
+        </Td>
+      )}
+      {visibleColumns.revenue7d && (
+        <Td
+          textAlign="center"
+          minW={{ base: "90px", sm: "105px", md: "120px", lg: "130px" }}
+          maxW={{ base: "90px", sm: "105px", md: "120px", lg: "130px" }}
+          w={{ base: "90px", sm: "105px", md: "120px", lg: "130px" }}
+        >
+          <Skeleton isLoaded={!protocolRevenue.isLoading}>
+            <Text fontSize="sm">{formatNumber(protocolRevenue.data?.total7d ? protocolRevenue.data.total7d / 7 : 0)}</Text>
+          </Skeleton>
+        </Td>
+      )}
+      {visibleColumns.revenueAllTime && (
+        <Td
+          textAlign="center"
+          minW={{ base: "95px", sm: "110px", md: "125px", lg: "140px" }}
+          maxW={{ base: "95px", sm: "110px", md: "125px", lg: "140px" }}
+          w={{ base: "95px", sm: "110px", md: "125px", lg: "140px" }}
+        >
+          <Skeleton isLoaded={!protocolRevenue.isLoading}>
+            <Text fontSize="sm">{formatNumber(protocolRevenue.data?.totalAllTime || 0)}</Text>
+          </Skeleton>
+        </Td>
+      )}
+      {visibleColumns.revenueAnnualized24h && (
+        <Td
+          textAlign="center"
+          minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+        >
+          <Skeleton isLoaded={!protocolRevenue.isLoading}>
+            <Text fontSize="sm" fontWeight="bold" color={useColorModeValue('green.600', 'green.400')}>
+              {formatNumber((protocolRevenue.data?.total24h || 0) * 365)}
+            </Text>
+          </Skeleton>
+        </Td>
+      )}
+      {visibleColumns.revenueAnnualized7d && (
+        <Td
+          textAlign="center"
+          minW={{ base: "110px", sm: "125px", md: "140px", lg: "155px" }}
+          maxW={{ base: "110px", sm: "125px", md: "140px", lg: "155px" }}
+          w={{ base: "110px", sm: "125px", md: "140px", lg: "155px" }}
+        >
+          <Skeleton isLoaded={!protocolRevenue.isLoading}>
+            <Text fontSize="sm" fontWeight="bold" color={useColorModeValue('green.600', 'green.400')}>
+              {formatNumber(protocolRevenue.data?.total7d ? (protocolRevenue.data.total7d / 7) * 365 : 0)}
+            </Text>
+          </Skeleton>
+        </Td>
+      )}
+      {visibleColumns.revenueToMarketCap24h && (
+        <Td
+          textAlign="center"
+          minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+        >
+          <Text 
+            fontSize="sm" 
+            color={getColorForMetric(((protocolRevenue.data?.total24h || 0) * 365) / (marketCap || 1) * 100, 'revenueToMarketCap', colorMode)}
+            fontWeight="semibold"
+          >
+            {marketCap > 0 ? formatPercentage(((protocolRevenue.data?.total24h || 0) * 365) / marketCap) : 'N/A'}
+          </Text>
+        </Td>
+      )}
+      {visibleColumns.revenueToTVL24h && (
+        <Td
+          textAlign="center"
+          minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+        >
+          <Text 
+            fontSize="sm" 
+            color={getColorForMetric(((protocolRevenue.data?.total24h || 0) * 365) / (protocolTVL || 1) * 100, 'revenueToTVL', colorMode)}
+            fontWeight="semibold"
+          >
+            {protocolTVL > 0 ? formatPercentage(((protocolRevenue.data?.total24h || 0) * 365) / protocolTVL) : 'N/A'}
+          </Text>
+        </Td>
+      )}
+      {visibleColumns.revenueToMarketCap7d && (
+        <Td
+          textAlign="center"
+          minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+        >
+          <Text 
+            fontSize="sm" 
+            color={getColorForMetric((protocolRevenue.data?.total7d ? (protocolRevenue.data.total7d / 7) * 365 : 0) / (marketCap || 1) * 100, 'revenueToMarketCap', colorMode)}
+            fontWeight="semibold"
+          >
+            {marketCap > 0 ? formatPercentage((protocolRevenue.data?.total7d ? (protocolRevenue.data.total7d / 7) * 365 : 0) / marketCap) : 'N/A'}
+          </Text>
+        </Td>
+      )}
+      {visibleColumns.revenueToTVL7d && (
+        <Td
+          textAlign="center"
+          minW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          maxW={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+          w={{ base: "100px", sm: "115px", md: "130px", lg: "145px" }}
+        >
+          <Text 
+            fontSize="sm" 
+            color={getColorForMetric((protocolRevenue.data?.total7d ? (protocolRevenue.data.total7d / 7) * 365 : 0) / (protocolTVL || 1) * 100, 'revenueToTVL', colorMode)}
+            fontWeight="semibold"
+          >
+            {protocolTVL > 0 ? formatPercentage((protocolRevenue.data?.total7d ? (protocolRevenue.data.total7d / 7) * 365 : 0) / protocolTVL) : 'N/A'}
+          </Text>
         </Td>
       )}
     </Tr>

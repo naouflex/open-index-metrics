@@ -56,7 +56,7 @@ function DataSourcesModal() {
     },
     {
       name: "DeFiLlama API", 
-      description: "Protocol TVL (Total Value Locked), DeFi analytics",
+      description: "Protocol TVL (Total Value Locked), revenue/fees data, token prices, DeFi analytics",
       url: "https://defillama.com/docs/api",
       category: "DeFi Analytics"
     },
@@ -166,6 +166,29 @@ function DataSourcesModal() {
                 </Box>
               ))}
             </VStack>
+            
+            {/* Revenue Data Disclaimer */}
+            <Box 
+              mt={6} 
+              p={4} 
+              bg={useColorModeValue('yellow.50', 'yellow.900')}
+              border="1px solid"
+              borderColor={useColorModeValue('yellow.300', 'yellow.600')}
+              borderRadius="md"
+            >
+              <HStack spacing={2} align="flex-start" mb={2}>
+                <InfoIcon color={useColorModeValue('yellow.600', 'yellow.300')} mt={1} />
+                <Text fontSize="sm" fontWeight="bold" color={useColorModeValue('yellow.800', 'yellow.200')}>
+                  Revenue Data Disclaimer
+                </Text>
+              </HStack>
+              <Text fontSize="xs" color={useColorModeValue('yellow.900', 'yellow.100')}>
+                Revenue figures from DeFiLlama primarily include protocol fees and may not capture all income streams. 
+                These numbers represent on-chain fees collected by protocols and might exclude off-chain revenue, 
+                token emissions value, or other indirect revenue sources. Use these metrics as indicators of protocol 
+                activity rather than complete financial statements.
+              </Text>
+            </Box>
           </ModalBody>
           <ModalFooter>
             <Button onClick={onClose} size="sm">Close</Button>

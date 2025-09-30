@@ -42,7 +42,8 @@ export {
   useProtocolTVLHistory,
   useProtocolTVLByChain,
   useDefiLlamaComplete,
-  useProtocolSearch
+  useProtocolSearch,
+  useProtocolRevenue
 } from './useDefiLlama.js';
 
 // Fraxswap hooks
