@@ -2,7 +2,7 @@ import { calculateYearsOnChain } from '../config/protocols.js';
 
 // ================= CSV EXPORT FUNCTION =================
 
-export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume) {
+export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allStablePrices, allGovTokenPrices) {
   const headers = [
     'Protocol',
     'Name',
@@ -10,6 +10,10 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     'Mainnet Launch',
     'Years Onchain',
     'OPEN Status',
+    'Stable Name',
+    'Stable Price',
+    'Gov Token Price',
+    'Current Weight %',
     'Market Cap',
     'FDV',
     'Volume 24h',
@@ -106,6 +110,13 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     const totalDexVolume = curveVolume + uniswapVolume + balancerVolume + sushiVolume;
     const liquidityTurnover = totalDexTVL > 0 ? totalDexVolume / totalDexTVL : 0;
 
+    // Get stable and gov token prices
+    const stablePrice = allStablePrices[index]?.data ? Number(allStablePrices[index].data) : null;
+    const govTokenPrice = allGovTokenPrices[index]?.data ? Number(allGovTokenPrices[index].data) : null;
+    
+    // Current weight is only calculated for 'current' protocols
+    const currentWeight = protocol.openStatus === 'current' ? protocol.sortValues?.currentWeight || 0 : 0;
+
     const row = [
       protocol.ticker,
       protocol.name,
@@ -113,6 +124,10 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
       protocol.mainnetLaunch,
       `${yearsOnChain}y`,
       protocol.openStatus,
+      protocol.stableName || 'N/A',
+      stablePrice ? stablePrice.toFixed(4) : 'N/A',
+      govTokenPrice ? govTokenPrice.toFixed(4) : 'N/A',
+      protocol.openStatus === 'current' ? currentWeight.toFixed(2) : 'N/A',
       marketCap,
       fdv,
       volume24h,
