@@ -168,6 +168,20 @@ export const protocols = [
     openStatus: "current",
     nextEmissions: 1937000,
     emissionsCatalyst: "Stability Pool issuance, since d1 til forever, halves every year."
+  },
+  {
+    ticker: "RSUP",
+    name: "ReSUpply",
+    govContractAddress: "0x419905009e4656fdc02418c7df35b1e61ed5f726", 
+    stableAddress: "0x57ab1e0003f623289cd798b1824be09a793e4bec", 
+    stableName: "reUSD",
+    coingeckoId: "resupply", 
+    defiLlamaSlug: "resupply", 
+    blockchain: "ethereum",
+    mainnetLaunch: "2025-03-20", 
+    openStatus: "watchlist",
+    nextEmissions: 0, 
+    emissionsCatalyst: "Insurance pool and borrower incentives" 
   }
 ];
 
