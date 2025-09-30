@@ -8,7 +8,10 @@ import {
   Text,
   useColorModeValue,
   Button,
-  Flex
+  Flex,
+  HStack,
+  VStack,
+  Badge
 } from '@chakra-ui/react';
 
 import { DownloadIcon } from '@chakra-ui/icons';
@@ -30,7 +33,10 @@ import {
   useFraxswapTVL,
   useFraxswap24hVolume,
   useTokenBalanceWithUSD,
-  useTokenPrice
+  useTokenPrice,
+  useTokenBalance,
+  useTokenDecimals,
+  useTokenTotalSupply
 } from '../hooks/index.js';
 
 import ProtocolRow from './ProtocolRow.jsx';
@@ -143,22 +149,157 @@ export default function DeFiDashboard() {
   );
 
   // Load all stable prices from DeFiLlama
+  // Prices are cached at the server level and client level with React Query
   const allStablePrices = protocols.map(protocol => 
     useTokenPrice(
       protocol.stableAddress,
       protocol.blockchain,
-      { enabled: allProtocolsLoaded && protocol.stableAddress !== null }
+      { 
+        enabled: allProtocolsLoaded && protocol.stableAddress !== null,
+        staleTime: 1 * 60 * 1000, // 1 minute - prices change frequently
+        cacheTime: 3 * 60 * 1000 // 3 minutes
+      }
     )
   );
 
   // Load all governance token prices from DeFiLlama
+  // Prices are cached at the server level and client level with React Query
   const allGovTokenPrices = protocols.map(protocol => 
     useTokenPrice(
       protocol.govContractAddress,
       protocol.blockchain,
-      { enabled: allProtocolsLoaded }
+      { 
+        enabled: allProtocolsLoaded,
+        staleTime: 1 * 60 * 1000, // 1 minute - prices change frequently
+        cacheTime: 3 * 60 * 1000 // 3 minutes
+      }
     )
   );
+
+  // Load OPEN Stablecoin Index price
+  const OPEN_TOKEN_ADDRESS = '0x323c03c48660fe31186fa82c289b0766d331ce21';
+  const openIndexPrice = useTokenPrice(
+    OPEN_TOKEN_ADDRESS,
+    'ethereum',
+    { 
+      enabled: true,
+      staleTime: 1 * 60 * 1000, // 1 minute - price changes frequently
+      cacheTime: 3 * 60 * 1000 // 3 minutes
+    }
+  );
+
+  // Get protocols with "current" status for theoretical price calculation
+  const currentProtocols = useMemo(() => 
+    protocols.filter(p => p.openStatus === 'current'),
+    []
+  );
+  
+  // Fetch token balances held in OPEN address for current protocols
+  // Using longer cache times since these don't change rapidly
+  const openHoldingsBalances = currentProtocols.map(protocol =>
+    useTokenBalance(
+      protocol.govContractAddress,
+      OPEN_TOKEN_ADDRESS,
+      { 
+        enabled: allProtocolsLoaded,
+        staleTime: 2 * 60 * 1000, // 2 minutes
+        cacheTime: 5 * 60 * 1000 // 5 minutes
+      }
+    )
+  );
+  
+  // Fetch decimals for current protocol tokens
+  // Decimals never change, so cache for a long time
+  const openHoldingsDecimals = currentProtocols.map(protocol =>
+    useTokenDecimals(
+      protocol.govContractAddress,
+      { 
+        enabled: allProtocolsLoaded,
+        staleTime: 24 * 60 * 60 * 1000, // 24 hours
+        cacheTime: 7 * 24 * 60 * 60 * 1000 // 7 days
+      }
+    )
+  );
+  
+  // Fetch prices for current protocol tokens (using existing allGovTokenPrices)
+  // Map current protocols to their indices in the full protocols array
+  const currentProtocolIndices = useMemo(() => 
+    currentProtocols.map(cp => 
+      protocols.findIndex(p => p.ticker === cp.ticker)
+    ),
+    [currentProtocols]
+  );
+  
+  // Get OPEN token total supply and decimals
+  // Cache these for longer since they don't change often
+  const openTotalSupply = useTokenTotalSupply(
+    OPEN_TOKEN_ADDRESS, 
+    { 
+      enabled: true,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 15 * 60 * 1000 // 15 minutes
+    }
+  );
+  const openDecimals = useTokenDecimals(
+    OPEN_TOKEN_ADDRESS, 
+    { 
+      enabled: true,
+      staleTime: 24 * 60 * 60 * 1000, // 24 hours
+      cacheTime: 7 * 24 * 60 * 60 * 1000 // 7 days
+    }
+  );
+  
+  // Calculate theoretical price (NAV - Net Asset Value)
+  // Formula: Total Value of Holdings / Total Supply
+  // 
+  // Caching Strategy:
+  // - Token balances: 2 min stale / 5 min cache (client) + 1 min (server)
+  // - Token decimals: 24 hour stale / 7 day cache (never changes)
+  // - Token prices: 1 min stale / 3 min cache (client) + 1 hour (server)
+  // - Total supply: 5 min stale / 15 min cache (client) + 10 min (server)
+  const theoreticalPrice = useMemo(() => {
+    if (!allProtocolsLoaded) return null;
+    
+    let totalValue = 0;
+    let allDataLoaded = true;
+    
+    currentProtocols.forEach((protocol, index) => {
+      const balance = openHoldingsBalances[index];
+      const decimals = openHoldingsDecimals[index];
+      const protocolIndex = currentProtocolIndices[index];
+      const price = allGovTokenPrices[protocolIndex];
+      
+      if (balance.isLoading || decimals.isLoading || price.isLoading) {
+        allDataLoaded = false;
+        return;
+      }
+      
+      if (balance.data && decimals.data && price.data) {
+        const formattedBalance = balance.data / Math.pow(10, decimals.data);
+        const tokenValue = formattedBalance * Number(price.data);
+        totalValue += tokenValue;
+      }
+    });
+    
+    if (!allDataLoaded || openTotalSupply.isLoading || openDecimals.isLoading) {
+      return null;
+    }
+    
+    if (openTotalSupply.data && openDecimals.data && openTotalSupply.data > 0) {
+      const formattedSupply = openTotalSupply.data / Math.pow(10, openDecimals.data);
+      return totalValue / formattedSupply;
+    }
+    
+    return null;
+  }, [
+    allProtocolsLoaded, 
+    openHoldingsBalances, 
+    openHoldingsDecimals, 
+    allGovTokenPrices, 
+    currentProtocolIndices,
+    openTotalSupply,
+    openDecimals
+  ]);
 
   useEffect(() => {
     // Load protocols one by one with short delays (Pro API can handle faster loading)
@@ -312,13 +453,77 @@ export default function DeFiDashboard() {
       py={{ base: 1, sm: 2, md: 3 }}
       px={{ base: 1, sm: 2, md: 3 }}
     >
-      {/* Export Button */}
+      {/* OPEN Index Price & Export Button */}
       <Flex 
-        justify="flex-end" 
+        justify="space-between" 
         align="center" 
         mb={2}
         px={2}
+        wrap="wrap"
+        gap={2}
       >
+        {/* OPEN Stablecoin Index Display */}
+        <HStack spacing={3} wrap="wrap">
+          <Box
+            bg={useColorModeValue('blue.50', 'blue.900')}
+            border="2px solid"
+            borderColor={useColorModeValue('blue.300', 'blue.600')}
+            borderRadius="lg"
+            px={4}
+            py={3}
+            boxShadow="md"
+          >
+            <HStack spacing={4} divider={<Box w="1px" h="40px" bg={useColorModeValue('blue.300', 'blue.600')} />}>
+              <VStack align="flex-start" spacing={0}>
+                <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} fontWeight="medium">
+                  OPEN Index - Market Price
+                </Text>
+                <HStack spacing={2}>
+                  <Text fontSize="2xl" fontWeight="bold" color={useColorModeValue('blue.700', 'blue.300')}>
+                    {openIndexPrice.data ? `$${Number(openIndexPrice.data).toFixed(4)}` : 'Loading...'}
+                  </Text>
+                  <Badge colorScheme="blue" fontSize="xs">
+                    Live
+                  </Badge>
+                </HStack>
+              </VStack>
+              
+              <VStack align="flex-start" spacing={0}>
+                <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} fontWeight="medium">
+                  Theoretical Price (NAV)
+                </Text>
+                <HStack spacing={2}>
+                  <Text fontSize="2xl" fontWeight="bold" color={useColorModeValue('green.700', 'green.300')}>
+                    {theoreticalPrice ? `$${theoreticalPrice.toFixed(4)}` : 'Calculating...'}
+                  </Text>
+                  <Badge colorScheme="green" fontSize="xs">
+                    On-chain
+                  </Badge>
+                </HStack>
+              </VStack>
+              
+              {theoreticalPrice && openIndexPrice.data && (
+                <VStack align="flex-start" spacing={0}>
+                  <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} fontWeight="medium">
+                    Premium/Discount
+                  </Text>
+                  <Text 
+                    fontSize="xl" 
+                    fontWeight="bold" 
+                    color={
+                      ((Number(openIndexPrice.data) / theoreticalPrice - 1) * 100) >= 0 
+                        ? useColorModeValue('green.600', 'green.400')
+                        : useColorModeValue('red.600', 'red.400')
+                    }
+                  >
+                    {((Number(openIndexPrice.data) / theoreticalPrice - 1) * 100).toFixed(2)}%
+                  </Text>
+                </VStack>
+              )}
+            </HStack>
+          </Box>
+        </HStack>
+
         <Button
           leftIcon={<DownloadIcon />}
           colorScheme="blue"
