@@ -29,7 +29,8 @@ import {
   useSushiTotalVolume24h,
   useFraxswapTVL,
   useFraxswap24hVolume,
-  useTokenBalanceWithUSD
+  useTokenBalanceWithUSD,
+  useTokenPrice
 } from '../hooks/index.js';
 
 import ProtocolRow from './ProtocolRow.jsx';
@@ -139,6 +140,15 @@ export default function DeFiDashboard() {
   );
   const allSushiVolume = protocols.map(protocol => 
     useSushiTotalVolume24h(protocol.govContractAddress, { enabled: allProtocolsLoaded })
+  );
+
+  // Load all stable prices from DeFiLlama
+  const allStablePrices = protocols.map(protocol => 
+    useTokenPrice(
+      protocol.stableAddress,
+      protocol.blockchain,
+      { enabled: allProtocolsLoaded && protocol.stableAddress !== null }
+    )
   );
 
   useEffect(() => {
@@ -273,7 +283,8 @@ export default function DeFiDashboard() {
       allBalancerTVL,
       allBalancerVolume,
       allSushiTVL,
-      allSushiVolume
+      allSushiVolume,
+      allStablePrices
     );
   };
 
@@ -443,6 +454,20 @@ export default function DeFiDashboard() {
               >
                 $OPEN Status
               </SortableHeader>
+              <Th 
+                fontSize="xs"
+                textAlign="center"
+                minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+                w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+              >
+                <Box position="relative" h="90px" display="flex" flexDirection="column" alignItems="center" justifyContent="flex-start" pt={2}>
+                  <Text mb={2}>Stable Price</Text>
+                  <Box position="absolute" bottom={1}>
+                    <DataSourceBadge source="DeFiLlama API" />
+                  </Box>
+                </Box>
+              </Th>
               
               {/* Market Metrics */}
               <SortableHeader 

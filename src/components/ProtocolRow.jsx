@@ -29,7 +29,8 @@ import {
   useSushiTotalVolume24h,
   useFraxswapTVL,
   useFraxswap24hVolume,
-  useTokenBalanceWithUSD
+  useTokenBalanceWithUSD,
+  useTokenPrice
 } from '../hooks/index.js';
 import { getColorForMetric } from '../utils/colorHelpers.js';
 import SpecialTreatmentBadge from './SpecialTreatmentBadge.jsx';
@@ -99,6 +100,13 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
     { enabled: shouldLoad && protocol.ticker === 'ALCX' }
   );
   
+  // Get stable price from DeFiLlama
+  const stablePrice = useTokenPrice(
+    protocol.stableAddress,
+    protocol.blockchain,
+    { enabled: shouldLoad && protocol.stableAddress !== null }
+  );
+  
   // If not loading yet, show skeleton
   if (!shouldLoad) {
     return (
@@ -123,7 +131,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
         <Td>
           <Skeleton height="20px" width="90px" />
         </Td>
-        <Td colSpan={29}>
+        <Td colSpan={30}>
           <Skeleton height="20px" />
         </Td>
       </Tr>
@@ -396,6 +404,29 @@ export default function ProtocolRow({ protocol, shouldLoad = false }) {
         <Badge colorScheme={protocol.openStatus === 'current' ? 'green' : 'orange'} size="sm">
           {protocol.openStatus}
         </Badge>
+      </Td>
+      
+      {/* Stable Price */}
+      <Td
+        textAlign="center"
+        minW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        maxW={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+        w={{ base: "80px", sm: "90px", md: "100px", lg: "110px" }}
+      >
+        {protocol.stableAddress ? (
+          <Skeleton isLoaded={!stablePrice.isLoading}>
+            <VStack spacing={0} align="center">
+              <Text fontSize="sm" fontWeight="semibold">
+                {protocol.stableName}
+              </Text>
+              <Text fontSize="sm">
+                {stablePrice.data ? `$${Number(stablePrice.data).toFixed(4)}` : 'N/A'}
+              </Text>
+            </VStack>
+          </Skeleton>
+        ) : (
+          <Text fontSize="sm" color="gray.500">N/A</Text>
+        )}
       </Td>
       
       {/* Market Metrics */}
