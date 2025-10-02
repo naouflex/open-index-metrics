@@ -645,7 +645,8 @@ export default function DeFiDashboard() {
       }}
       w="100vw"
       maxW="100vw"
-      py={{ base: 1, sm: 2, md: 3 }}
+      pt={{ base: 1, sm: 2, md: 3 }}
+      pb={{ base: 4, sm: 6, md: 8 }}
       px={{ base: 1, sm: 2, md: 3 }}
     >
       {/* OPEN Index Price & Export Button */}
