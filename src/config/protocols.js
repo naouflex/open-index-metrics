@@ -103,8 +103,8 @@ export const protocols = [
     ticker: "SYRUP",
     name: "Maple Finance",
     govContractAddress: "0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66",
-    stableAddress: null, // Maple doesn't have a native stablecoin
-    stableName: null,
+    stableAddress: "0x80ac24aa929eaf5013f6436cda2a7ba190f5cc0b", // Maple doesn't have a native stablecoin
+    stableName: "syrupUSD",
     coingeckoId: "syrup",
     defiLlamaSlug: "maple",
     blockchain: "ethereum",
