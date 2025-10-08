@@ -180,7 +180,7 @@ export const protocols = [
     blockchain: "ethereum",
     mainnetLaunch: "2025-03-20", 
     openStatus: "watchlist",
-    nextEmissions: 0, 
+    nextEmissions: 10994470.36, 
     emissionsCatalyst: "Insurance pool and borrower incentives" 
   }
 ];
