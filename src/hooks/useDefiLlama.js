@@ -43,8 +43,14 @@ export function useTokenPrice(tokenAddress, chain = 'ethereum', options = {}) {
     enabled: !!tokenAddress,
     staleTime: 1 * 60 * 1000, // 1 minute (prices change frequently)
     cacheTime: 3 * 60 * 1000, // 3 minutes
-    retry: 2,
-    retryDelay: 1000,
+    retry: (failureCount, error) => {
+      // Only retry on network errors or 5xx errors, not on 4xx errors
+      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+        return false; // Don't retry client errors
+      }
+      return failureCount < 2; // Max 2 retries for other errors
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 3000), // Exponential backoff, max 3s
     ...options
   });
 }
@@ -63,8 +69,14 @@ export function useMultipleTokenPrices(tokenAddresses, chain = 'ethereum', optio
     enabled: !!tokenAddresses && tokenAddresses.length > 0,
     staleTime: 1 * 60 * 1000, // 1 minute
     cacheTime: 3 * 60 * 1000, // 3 minutes
-    retry: 2,
-    retryDelay: 1000,
+    retry: (failureCount, error) => {
+      // Only retry on network errors or 5xx errors
+      if (error?.response?.status >= 400 && error?.response?.status < 500) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 3000),
     ...options
   });
 }
