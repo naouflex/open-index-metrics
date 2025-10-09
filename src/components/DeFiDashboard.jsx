@@ -65,7 +65,7 @@ const COLUMN_DEFINITIONS = {
   tvlCG: 'TVL',
   mcToFdv: 'Market Cap / FDV (%)',
   mcToTvl: 'Market Cap / TVL (%)',
-  fdvToTvl: 'FDV / TVL (%)',
+  tvlToFdv: 'TVL / FDV (%)',
   maxSupply: 'Max Supply',
   totalSupply: 'Total Supply',
   circSupply: 'Circ Supply',
@@ -481,7 +481,7 @@ export default function DeFiDashboard() {
       const yearsOnChain = calculateYearsOnChain(protocol.mainnetLaunch);
       const mcToFdv = fdv > 0 ? marketCap / fdv : 0;
       const mcToTvl = coinGeckoTVL > 0 ? marketCap / coinGeckoTVL : 0;
-      const fdvToTvl = coinGeckoTVL > 0 ? fdv / coinGeckoTVL : 0;
+      const tvlToFdv = fdv > 0 ? coinGeckoTVL / fdv : 0;
       const circToTotal = totalSupply > 0 ? circSupply / totalSupply : 0;
       const nextReleasePercentage = circSupply > 0 ? protocol.nextEmissions / circSupply : 0;
       
@@ -539,7 +539,7 @@ export default function DeFiDashboard() {
           tvlCG: coinGeckoTVL,
           mcToFdv,
           mcToTvl,
-          fdvToTvl,
+          tvlToFdv,
           maxSupply,
           totalSupply,
           circSupply,
@@ -1047,9 +1047,9 @@ export default function DeFiDashboard() {
                   Market Cap / TVL (%)
                 </SortableHeader>
               )}
-              {visibleColumns.fdvToTvl && (
+              {visibleColumns.tvlToFdv && (
                 <SortableHeader 
-                  column="fdvToTvl" 
+                  column="tvlToFdv" 
                   currentSort={sortConfig} 
                   onSort={handleSort} 
                   onReset={handleReset} 
@@ -1059,7 +1059,7 @@ export default function DeFiDashboard() {
                   maxW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
                   w={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
                 >
-                  FDV / TVL (%)
+                  TVL / FDV (%)
                 </SortableHeader>
               )}
               

@@ -215,7 +215,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false, currentWeigh
   // Ratios
   const mcToFdv = fdv > 0 ? marketCap / fdv : 0;
   const mcToTvl = coinGeckoTVL > 0 ? marketCap / coinGeckoTVL : 0;
-  const fdvToTvl = coinGeckoTVL > 0 ? fdv / coinGeckoTVL : 0;
+  const tvlToFdv = fdv > 0 ? coinGeckoTVL / fdv : 0;
   const circToTotal = totalSupply > 0 ? circSupply / totalSupply : 0;
   const nextReleasePercentage = circSupply > 0 ? protocol.nextEmissions / circSupply : 0;
 
@@ -604,7 +604,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false, currentWeigh
         </Td>
       )}
 
-      {visibleColumns.fdvToTvl && (
+      {visibleColumns.tvlToFdv && (
         <Td
           textAlign="center"
           minW={{ base: "80px", sm: "90px", md: "105px", lg: "115px" }}
@@ -613,10 +613,10 @@ export default function ProtocolRow({ protocol, shouldLoad = false, currentWeigh
         >
           <Text
             fontSize="sm"
-            color={getColorForMetric(fdvToTvl * 100, 'fdvToTvl', colorMode)}
+            color={getColorForMetric(tvlToFdv * 100, 'tvlToFdv', colorMode)}
             fontWeight="semibold"
           >
-            {formatPercentage(fdvToTvl)}
+            {formatPercentage(tvlToFdv)}
           </Text>
         </Td>
       )}

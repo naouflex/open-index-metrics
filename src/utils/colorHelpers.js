@@ -37,8 +37,8 @@ export function getColorForMetric(value, metricType, colorMode = 'light') {
     case 'mcToTvl': // Lower is better (more efficient)
       return getColorScale(value, { low: 50, medium: 100, high: 200 }, true);
     
-    case 'fdvToTvl': // Lower is better (more efficient) 
-      return getColorScale(value, { low: 100, medium: 200, high: 500 }, true);
+    case 'tvlToFdv': // Higher is better (more TVL relative to valuation) 
+      return getColorScale(value, { low: 20, medium: 50, high: 100 }, false);
     
     case 'circToTotal': // Higher is better (more circulating)
       return getColorScale(value, { low: 30, medium: 60, high: 85 }, false);
