@@ -9,7 +9,7 @@ export class DefiLlamaFetcher {
     // Initialize request queue with conservative rate limits for DefiLlama
     this.requestQueue = new RequestQueue({
       concurrency: 2, // Max 2 concurrent requests
-      requestsPerSecond: 3, // Conservative rate limit (3 requests per second)
+      requestsPerSecond: 2, // Conservative rate limit (3 requests per second)
       retryAttempts: 3,
       baseDelay: 2000, // Start with 2s delay
       maxDelay: 60000, // Max 1 minute delay
