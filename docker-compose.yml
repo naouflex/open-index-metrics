@@ -15,6 +15,14 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
 
+  # Redis cache database
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
   # Data caching service
   cache-service:
     build:
@@ -40,7 +48,10 @@ services:
       - CURVE_SUBGRAPH_ID=${CURVE_SUBGRAPH_ID}
       - FRAXSWAP_SUBGRAPH_ID=${FRAXSWAP_SUBGRAPH_ID}
       - BALANCER_V2_SUBGRAPH_ID=${BALANCER_V2_SUBGRAPH_ID}
+      - DEFILLAMA_API_KEY=${DEFILLAMA_API_KEY}
 
     restart: unless-stopped
 
  
+volumes:
+  redis_data:

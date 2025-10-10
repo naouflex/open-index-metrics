@@ -1521,25 +1521,34 @@ async function startServer() {
     logger.info(`Environment: NODE_ENV=${process.env.NODE_ENV}`);
     logger.info(`Port: ${PORT}`);
     
-    // Try to connect to Redis
-    logger.info('Connecting to Redis...');
-    await redis.connect();
-    logger.info('Redis connection successful');
+    // Try to connect to Redis (but don't fail if it's not available)
+    try {
+      logger.info('Connecting to Redis...');
+      await redis.connect();
+      logger.info('Redis connection successful');
+      cacheManager = new CacheManager(redis);
+    } catch (redisError) {
+      logger.warn('Redis connection failed - service will run without caching:', redisError.message);
+      logger.warn('This may result in slower response times and higher API usage');
+      // Set cacheManager to null - endpoints will handle this gracefully
+      cacheManager = null;
+    }
     
-    cacheManager = new CacheManager(redis);
-    
-    // Schedule data refresh every hour as requested
-    cron.schedule('0 * * * *', refreshAllData);
-    
-    // Initial data refresh
-    setTimeout(async () => {
-      logger.info('Starting initial data refresh...');
-      await refreshAllData();
-    }, 5000); // 5 seconds after startup
+    // Schedule data refresh every hour as requested (only if Redis is available)
+    if (cacheManager) {
+      cron.schedule('0 * * * *', refreshAllData);
+      
+      // Initial data refresh
+      setTimeout(async () => {
+        logger.info('Starting initial data refresh...');
+        await refreshAllData();
+      }, 5000); // 5 seconds after startup
+    }
     
     app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Cache service running on port ${PORT} (all interfaces)`);
       logger.info('Service fully initialized and ready to accept requests');
+      logger.info(`Redis caching: ${cacheManager ? 'ENABLED' : 'DISABLED'}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
@@ -1555,7 +1564,9 @@ async function startServer() {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
-  await redis.quit();
+  if (redis.isOpen) {
+    await redis.quit();
+  }
   process.exit(0);
 });
 

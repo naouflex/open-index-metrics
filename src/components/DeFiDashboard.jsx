@@ -11,12 +11,7 @@ import {
   Flex,
   HStack,
   VStack,
-  Badge,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  CloseButton
+  Badge
 } from '@chakra-ui/react';
 
 import { DownloadIcon } from '@chakra-ui/icons';
@@ -110,7 +105,6 @@ export default function DeFiDashboard() {
   
   const [loadedProtocols, setLoadedProtocols] = useState(new Set());
   const [sortConfig, setSortConfig] = useState({ column: null, direction: 'desc' });
-  const [showServiceWarning, setShowServiceWarning] = useState(true);
   
   // Column visibility state with localStorage
   const [visibleColumns, setVisibleColumns] = useState(() => {
@@ -655,35 +649,6 @@ export default function DeFiDashboard() {
       pb={{ base: 4, sm: 6, md: 8 }}
       px={{ base: 1, sm: 2, md: 3 }}
     >
-      {/* Service Warning Alert */}
-      {showServiceWarning && (openIndexPrice.isError || openIndexPrice.isLoading) && (
-        <Alert 
-          status={openIndexPrice.isError ? "warning" : "info"} 
-          mb={2} 
-          borderRadius="md"
-          variant="left-accent"
-        >
-          <AlertIcon />
-          <Box flex="1">
-            <AlertTitle>
-              {openIndexPrice.isError ? "Cache Service Unavailable" : "Loading Price Data..."}
-            </AlertTitle>
-            <AlertDescription fontSize="sm">
-              {openIndexPrice.isError 
-                ? "Attempting to fetch prices directly from DeFiLlama. Some data may load slower than usual."
-                : "Fetching OPEN token price..."}
-            </AlertDescription>
-          </Box>
-          <CloseButton
-            alignSelf="flex-start"
-            position="relative"
-            right={-1}
-            top={-1}
-            onClick={() => setShowServiceWarning(false)}
-          />
-        </Alert>
-      )}
-
       {/* OPEN Index Price & Export Button */}
       <Flex 
         justify="space-between" 
@@ -711,19 +676,10 @@ export default function DeFiDashboard() {
                 </Text>
                 <HStack spacing={2}>
                   <Text fontSize="2xl" fontWeight="bold" color={useColorModeValue('blue.700', 'blue.300')}>
-                    {openIndexPrice.isError 
-                      ? 'Error' 
-                      : openIndexPrice.isLoading 
-                        ? 'Loading...' 
-                        : openIndexPrice.data 
-                          ? `$${Number(openIndexPrice.data).toFixed(4)}` 
-                          : 'N/A'}
+                    {openIndexPrice.data ? `$${Number(openIndexPrice.data).toFixed(4)}` : 'Loading...'}
                   </Text>
-                  <Badge 
-                    colorScheme={openIndexPrice.isError ? "red" : openIndexPrice.isLoading ? "yellow" : "blue"} 
-                    fontSize="xs"
-                  >
-                    {openIndexPrice.isError ? 'Error' : openIndexPrice.isLoading ? 'Loading' : 'Live'}
+                  <Badge colorScheme="blue" fontSize="xs">
+                    Live
                   </Badge>
                 </HStack>
               </VStack>

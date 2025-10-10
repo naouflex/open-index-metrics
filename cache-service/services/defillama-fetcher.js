@@ -3,8 +3,19 @@ import { RequestQueue, generateCacheKey } from './request-queue.js';
 
 export class DefiLlamaFetcher {
   constructor() {
-    this.baseUrl = 'https://api.llama.fi';
-    this.priceUrl = 'https://coins.llama.fi'; // Separate URL for price endpoints
+    // Get API key from environment
+    this.apiKey = process.env.defillama_api_key;
+    
+    if (!this.apiKey) {
+      console.warn('Warning: defillama_api_key not found in environment. Using free API endpoints.');
+      this.baseUrl = 'https://api.llama.fi';
+      this.priceUrl = 'https://coins.llama.fi';
+    } else {
+      // Use Pro API endpoints with API key
+      this.baseUrl = `https://pro-api.llama.fi/${this.apiKey}`;
+      this.priceUrl = `https://pro-api.llama.fi/${this.apiKey}/coins`;
+      console.log('DefiLlamaFetcher initialized with Pro API');
+    }
     
     // Initialize request queue with conservative rate limits for DefiLlama
     this.requestQueue = new RequestQueue({

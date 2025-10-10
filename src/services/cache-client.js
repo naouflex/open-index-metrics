@@ -8,7 +8,7 @@ const CACHE_API_BASE = '/api'; // Proxied to cache service via Nginx
 // Create axios instance for cache service
 const cacheApi = axios.create({
   baseURL: CACHE_API_BASE,
-  timeout: 5000, // Reduced timeout for faster failure detection
+  timeout: 8000, // Aligned with backend timeout to prevent 504 errors
 });
 
 // Add request/response interceptors for debugging
@@ -157,32 +157,8 @@ export async function getTokenPrice(tokenAddress, chain = 'ethereum') {
     const response = await cacheApi.get(`/defillama/token-price/${tokenAddress}?chain=${chain}`);
     return response.data?.price || null;
   } catch (error) {
-    console.error(`Error fetching token price from cache service for ${tokenAddress}:`, error.message);
-    
-    // Fallback: Try direct DeFiLlama API if cache service is down
-    try {
-      console.log(`Attempting direct DeFiLlama API call for ${tokenAddress}...`);
-      const directUrl = `https://coins.llama.fi/prices/current/${chain}:${tokenAddress.toLowerCase()}`;
-      const directResponse = await axios.get(directUrl, {
-        timeout: 5000,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      const tokenKey = `${chain}:${tokenAddress.toLowerCase()}`;
-      if (directResponse.data?.coins?.[tokenKey]?.price) {
-        const price = directResponse.data.coins[tokenKey].price;
-        console.log(`Successfully fetched price from DeFiLlama directly: $${price}`);
-        return price;
-      }
-      
-      console.warn(`No price data found for ${tokenAddress} from DeFiLlama`);
-      return null;
-    } catch (fallbackError) {
-      console.error(`Direct DeFiLlama API fallback also failed for ${tokenAddress}:`, fallbackError.message);
-      return null;
-    }
+    console.error(`Error fetching token price for ${tokenAddress}:`, error);
+    return null;
   }
 }
 
@@ -194,39 +170,8 @@ export async function getMultipleTokenPrices(tokenAddresses, chain = 'ethereum')
     });
     return response.data?.prices || {};
   } catch (error) {
-    console.error('Error fetching multiple token prices from cache service:', error.message);
-    
-    // Fallback: Try direct DeFiLlama API if cache service is down
-    try {
-      console.log(`Attempting direct DeFiLlama API call for batch token prices...`);
-      const addressString = tokenAddresses
-        .map(addr => `${chain}:${addr.toLowerCase()}`)
-        .join(',');
-      const directUrl = `https://coins.llama.fi/prices/current/${addressString}`;
-      
-      const directResponse = await axios.get(directUrl, {
-        timeout: 8000, // Longer timeout for batch requests
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      const prices = {};
-      if (directResponse.data?.coins) {
-        tokenAddresses.forEach(addr => {
-          const tokenKey = `${chain}:${addr.toLowerCase()}`;
-          if (directResponse.data.coins[tokenKey]) {
-            prices[addr.toLowerCase()] = directResponse.data.coins[tokenKey].price;
-          }
-        });
-      }
-      
-      console.log(`Successfully fetched ${Object.keys(prices).length} prices from DeFiLlama directly`);
-      return prices;
-    } catch (fallbackError) {
-      console.error('Direct DeFiLlama API fallback also failed for batch prices:', fallbackError.message);
-      return {};
-    }
+    console.error('Error fetching multiple token prices:', error);
+    return {};
   }
 }
 
