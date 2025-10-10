@@ -429,7 +429,9 @@ app.get('/api/coingecko/market-data/:coinId', async (req, res) => {
           return Promise.race([fetchPromise, timeoutPromise]);
         });
         
-        await cacheManager.set(cacheKey, data, 3600); // 1 hour
+        // Use shorter TTL for OPEN Index to ensure frequent updates
+        const dataType = coinId === 'open-stablecoin-index' ? 'market-data-open-index' : 'market-data';
+        await cacheManager.setWithSmartTTL(cacheKey, data, dataType);
         logger.info(`Fresh data fetched for ${coinId}:`, { price: data?.current_price, market_cap: data?.market_cap });
       } catch (fetchError) {
         logger.error(`Failed to fetch fresh data for ${coinId}:`, fetchError.message);
@@ -1503,6 +1505,7 @@ async function refreshAllData() {
   try {
     // Light refresh strategy - only essential data
     const coreProtocols = [
+      { coingeckoId: 'open-stablecoin-index', defiLlamaSlug: null }, // OPEN Index - critical for dashboard
       { coingeckoId: 'fxn-token', defiLlamaSlug: 'fx-protocol' },
       { coingeckoId: 'ethena', defiLlamaSlug: 'ethena-usde' },
       { coingeckoId: 'origin-protocol', defiLlamaSlug: 'origin-ether' },
