@@ -292,17 +292,22 @@ export default function DeFiDashboard() {
     )
   );
 
-  // Load OPEN Stablecoin Index price
+  // Load OPEN Stablecoin Index price from CoinGecko (DeFiLlama doesn't have it)
   const OPEN_TOKEN_ADDRESS = '0x323c03c48660fe31186fa82c289b0766d331ce21';
-  const openIndexPrice = useTokenPrice(
-    OPEN_TOKEN_ADDRESS,
-    'ethereum',
-    { 
-      enabled: true,
-      staleTime: 1 * 60 * 1000, // 1 minute - price changes frequently
-      cacheTime: 3 * 60 * 1000 // 3 minutes
-    }
-  );
+  const OPEN_COINGECKO_ID = 'open-stablecoin-index';
+  const openIndexPriceCG = useCoinGeckoMarketData(OPEN_COINGECKO_ID, { 
+    enabled: true,
+    staleTime: 1 * 60 * 1000, // 1 minute - price changes frequently
+    cacheTime: 3 * 60 * 1000 // 3 minutes
+  });
+  
+  // Extract the price from CoinGecko market data
+  const openIndexPrice = {
+    data: openIndexPriceCG.data?.current_price || null,
+    isLoading: openIndexPriceCG.isLoading,
+    isError: openIndexPriceCG.isError,
+    error: openIndexPriceCG.error
+  };
 
   // Get protocols with "current" status for theoretical price calculation
   const currentProtocols = useMemo(() => 
@@ -676,10 +681,12 @@ export default function DeFiDashboard() {
                 </Text>
                 <HStack spacing={2}>
                   <Text fontSize="2xl" fontWeight="bold" color={useColorModeValue('blue.700', 'blue.300')}>
-                    {openIndexPrice.data ? `$${Number(openIndexPrice.data).toFixed(4)}` : 'Loading...'}
+                    {openIndexPrice.isLoading ? 'Loading...' : 
+                     openIndexPrice.isError ? 'Error' :
+                     openIndexPrice.data ? `$${Number(openIndexPrice.data).toFixed(4)}` : 'N/A'}
                   </Text>
-                  <Badge colorScheme="blue" fontSize="xs">
-                    Live
+                  <Badge colorScheme={openIndexPrice.data ? "blue" : "gray"} fontSize="xs">
+                    {openIndexPrice.data ? 'Live' : 'Unavailable'}
                   </Badge>
                 </HStack>
               </VStack>
