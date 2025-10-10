@@ -173,12 +173,13 @@ class CacheManager {
    */
   async setWithSmartTTL(key, data, dataType = 'default') {
     const ttlConfig = {
-      'protocol-info': 3600, // 24 hours - protocol info changes infrequently
-      'token-price': 3600, // 5 minutes - prices change frequently
-      'protocol-tvl': 3600, // 30 minutes - TVL changes moderately
+      'protocol-info': 86400, // 24 hours - protocol info changes infrequently
+      'token-price': 300, // 5 minutes - prices change frequently
+      'protocol-tvl': 1800, // 30 minutes - TVL changes moderately
       'protocol-revenue': 3600, // 1 hour - revenue changes moderately
-      'all-protocols': 3600, // 12 hours - protocol list changes infrequently
-      'market-data': 3600, // 30 minutes - market data changes moderately
+      'all-protocols': 43200, // 12 hours - protocol list changes infrequently
+      'market-data': 1800, // 30 minutes - market data changes moderately
+      'market-data-open-index': 180, // 3 minutes - OPEN Index price needs frequent updates
       'volume-data': 3600, // 1 hour - volume data changes hourly
       'default': 3600 // 1 hour default
     };
