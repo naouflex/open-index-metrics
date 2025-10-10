@@ -17,7 +17,6 @@ export function useBalancerTVL(tokenAddress, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -33,10 +32,9 @@ export function useBalancer24hVolume(tokenAddress, options = {}) {
     queryKey: ['balancer', 'volume24h', tokenAddress?.toLowerCase()],
     queryFn: () => fetchBalancer24hVolume(tokenAddress),
     enabled: !!tokenAddress,
-    staleTime: 2 * 60 * 1000, // 2 minutes (volume changes more frequently)
+    staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }

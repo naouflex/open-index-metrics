@@ -30,7 +30,6 @@ import {
   useFraxswapTVL,
   useFraxswap24hVolume,
   useTokenBalanceWithUSD,
-  useTokenPrice,
   useProtocolRevenue
 } from '../hooks/index.js';
 import { getColorForMetric } from '../utils/colorHelpers.js';
@@ -38,7 +37,14 @@ import SpecialTreatmentBadge from './SpecialTreatmentBadge.jsx';
 
 // ================= PROTOCOL ROW COMPONENT =================
 
-export default function ProtocolRow({ protocol, shouldLoad = false, currentWeight, visibleColumns = {} }) {
+export default function ProtocolRow({ 
+  protocol, 
+  shouldLoad = false, 
+  currentWeight, 
+  visibleColumns = {}, 
+  stablePrice = { data: null, isLoading: false, isError: false }, 
+  govTokenPrice = { data: null, isLoading: false, isError: false }
+}) {
   // Only load data if shouldLoad is true (staggered loading)
   const coinGeckoData = useCoinGeckoComplete(protocol.coingeckoId, { enabled: shouldLoad });
   const defiLlamaTVL = useDefiLlamaTVL(protocol.defiLlamaSlug, { enabled: shouldLoad });
@@ -102,19 +108,7 @@ export default function ProtocolRow({ protocol, shouldLoad = false, currentWeigh
     { enabled: shouldLoad && protocol.ticker === 'ALCX' }
   );
 
-  // Get stable price from DeFiLlama
-  const stablePrice = useTokenPrice(
-    protocol.stableAddress,
-    protocol.blockchain,
-    { enabled: shouldLoad && protocol.stableAddress !== null }
-  );
-
-  // Get governance token price from DeFiLlama
-  const govTokenPrice = useTokenPrice(
-    protocol.govContractAddress,
-    protocol.blockchain,
-    { enabled: shouldLoad }
-  );
+  // Prices are now passed as props from DeFiDashboard (batch fetched for efficiency)
 
   // If not loading yet, show skeleton
   if (!shouldLoad) {

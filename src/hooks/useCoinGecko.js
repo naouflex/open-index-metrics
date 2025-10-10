@@ -17,32 +17,6 @@ import {
 
 // ================= COINGECKO HOOKS =================
 
-// Custom retry logic for rate limiting
-const retryWithBackoff = (failureCount, error) => {
-  // Don't retry non-rate-limit errors more than 1 time
-  if (error?.response?.status !== 429 && failureCount >= 1) {
-    return false;
-  }
-  
-  // For 429 errors, retry up to 5 times with exponential backoff
-  if (error?.response?.status === 429 && failureCount < 5) {
-    return true;
-  }
-  
-  // For other errors, retry up to 2 times
-  return failureCount < 2;
-};
-
-const getRetryDelay = (failureCount, error) => {
-  // For 429 errors, use exponential backoff
-  if (error?.response?.status === 429) {
-    return Math.min(1000 * Math.pow(2, failureCount), 30000); // Max 30 seconds
-  }
-  
-  // For other errors, use shorter delay
-  return 1000 * failureCount;
-};
-
 /**
  * Hook to fetch basic market data from CoinGecko
  * @param {string} coinId - CoinGecko coin ID
@@ -54,10 +28,9 @@ export function useCoinGeckoMarketData(coinId, options = {}) {
     queryKey: ['coingecko', 'marketData', coinId],
     queryFn: () => fetchCoinGeckoMarketData(coinId),
     enabled: !!coinId,
-    staleTime: 5 * 60 * 1000, // 5 minutes - increased from 2
-    gcTime: 30 * 60 * 1000, // 30 minutes - increased from 10
-    retry: retryWithBackoff,
-    retryDelay: getRetryDelay,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 2,
     ...options
   });
 }
@@ -73,10 +46,9 @@ export function useCoinGecko30dVolume(coinId, options = {}) {
     queryKey: ['coingecko', '30dVolume', coinId],
     queryFn: () => fetchCoinGecko30dVolume(coinId),
     enabled: !!coinId,
-    staleTime: 30 * 60 * 1000, // 30 minutes - increased from 5 (historical data changes slowly)
-    gcTime: 2 * 60 * 60 * 1000, // 2 hours - increased from 15 minutes
-    retry: retryWithBackoff,
-    retryDelay: getRetryDelay,
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    retry: 2,
     ...options
   });
 }
@@ -92,10 +64,9 @@ export function useTopExchanges24h(coinId, options = {}) {
     queryKey: ['coingecko', 'topExchanges', coinId],
     queryFn: () => fetchTopExchanges24h(coinId),
     enabled: !!coinId,
-    staleTime: 10 * 60 * 1000, // 10 minutes - increased from 5
-    gcTime: 60 * 60 * 1000, // 1 hour - increased from 15 minutes
-    retry: retryWithBackoff,
-    retryDelay: getRetryDelay,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    retry: 2,
     ...options
   });
 }
@@ -111,10 +82,9 @@ export function useAllMetricsRaw(coinId, options = {}) {
     queryKey: ['coingecko', 'allMetrics', coinId],
     queryFn: () => fetchAllMetricsRaw(coinId),
     enabled: !!coinId,
-    staleTime: 5 * 60 * 1000, // 5 minutes - increased from 2
-    gcTime: 30 * 60 * 1000, // 30 minutes - increased from 10
-    retry: retryWithBackoff,
-    retryDelay: getRetryDelay,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 2,
     ...options
   });
 }
@@ -147,10 +117,9 @@ export function useVolume24h(coinId, options = {}) {
     queryKey: ['coingecko', '24h-volume', coinId?.toLowerCase()],
     queryFn: () => fetchCoinGecko24hVolume(coinId),
     enabled: !!coinId,
-    staleTime: 5 * 60 * 1000, // 5 minutes (24h volume changes frequently)
+    staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
-    retry: retryWithBackoff,
-    retryDelay: 1000,
+    retry: 2,
     ...options
   });
 }
@@ -162,8 +131,7 @@ export function useVolume30d(coinId, options = {}) {
     enabled: !!coinId,
     staleTime: 30 * 60 * 1000, // 30 minutes
     cacheTime: 60 * 60 * 1000, // 1 hour
-    retry: retryWithBackoff,
-    retryDelay: 1000,
+    retry: 2,
     ...options
   });
 }

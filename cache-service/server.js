@@ -728,6 +728,47 @@ app.post('/api/defillama/batch-token-prices', async (req, res) => {
   }
 });
 
+// Multiple token prices endpoint (simplified interface)
+app.post('/api/defillama/multiple-token-prices', async (req, res) => {
+  try {
+    const { tokenAddresses, chain = 'ethereum' } = req.body;
+    
+    logger.info(`Batch price request for ${tokenAddresses?.length || 0} tokens`);
+    
+    if (!Array.isArray(tokenAddresses) || tokenAddresses.length === 0) {
+      return res.status(400).json({ error: 'Invalid tokenAddresses array' });
+    }
+    
+    // Create a cache key based on the token list
+    const tokenSignature = tokenAddresses.map(addr => `${chain}:${addr.toLowerCase()}`).sort().join(',');
+    const cacheKey = `defillama:multiple-prices:${chain}:${Buffer.from(tokenSignature).toString('base64').slice(0, 32)}`;
+    
+    const data = await safeExternalFetch(
+      cacheKey,
+      async () => {
+        // Convert to the format expected by fetchMultipleTokenPrices
+        const tokenRequests = tokenAddresses.map(address => ({
+          tokenAddress: address,
+          chain: chain
+        }));
+        logger.info(`Fetching ${tokenRequests.length} token prices from DeFiLlama`);
+        return await defiLlamaFetcher.fetchMultipleTokenPrices(tokenRequests);
+      },
+      defiLlamaCircuitBreaker,
+      15000,
+      'token-price'
+    );
+    
+    logger.info(`Returning ${Object.keys(data || {}).length} token prices`);
+    
+    // Return prices in a format the client expects
+    res.json({ prices: data });
+  } catch (error) {
+    logger.error('DeFiLlama multiple token prices error:', error);
+    res.status(500).json({ error: 'Failed to fetch multiple token prices', prices: {} });
+  }
+});
+
 
 
 // getProtocolInfo -> /api/defillama/protocol-info/:protocolSlug

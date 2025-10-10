@@ -20,7 +20,6 @@ export function useCurveTVL(tokenAddress, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -39,7 +38,6 @@ export function useCurve24hVolume(tokenAddress, options = {}) {
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }

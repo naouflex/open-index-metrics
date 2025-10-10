@@ -3,16 +3,18 @@ import { RequestQueue, generateCacheKey } from './request-queue.js';
 
 export class DefiLlamaFetcher {
   constructor() {
-    // Get API key from environment
-    this.apiKey = process.env.defillama_api_key;
+    // Get API key from environment (check both uppercase and lowercase for compatibility)
+    this.apiKey = process.env.DEFILLAMA_API_KEY ;
     
     if (!this.apiKey) {
-      console.warn('Warning: defillama_api_key not found in environment. Using free API endpoints.');
+      console.warn('Warning: DEFILLAMA_API_KEY not found in environment. Using free API endpoints.');
       this.baseUrl = 'https://api.llama.fi';
       this.priceUrl = 'https://coins.llama.fi';
     } else {
       // Use Pro API endpoints with API key
-      this.baseUrl = `https://pro-api.llama.fi/${this.apiKey}`;
+      // Pro API format: https://pro-api.llama.fi/{apiKey}/api/... for protocols
+      // Pro API format: https://pro-api.llama.fi/{apiKey}/coins/... for prices
+      this.baseUrl = `https://pro-api.llama.fi/${this.apiKey}/api`;
       this.priceUrl = `https://pro-api.llama.fi/${this.apiKey}/coins`;
       console.log('DefiLlamaFetcher initialized with Pro API');
     }
@@ -20,7 +22,7 @@ export class DefiLlamaFetcher {
     // Initialize request queue with conservative rate limits for DefiLlama
     this.requestQueue = new RequestQueue({
       concurrency: 2, // Max 2 concurrent requests
-      requestsPerSecond: 2, // Conservative rate limit (3 requests per second)
+      requestsPerSecond: 3, // Conservative rate limit (3 requests per second)
       retryAttempts: 3,
       baseDelay: 2000, // Start with 2s delay
       maxDelay: 60000, // Max 1 minute delay
@@ -102,8 +104,12 @@ export class DefiLlamaFetcher {
     });
     
     return this.requestQueue.enqueue(requestKey, async () => {
-      const url = `${this.priceUrl}/prices/current/${chain}:${tokenAddress.toLowerCase()}`;
-      console.log(`Fetching token price for: ${chain}:${tokenAddress}`);
+      // Construct the coin identifier (chain:address format)
+      const coinId = `${chain}:${tokenAddress.toLowerCase()}`;
+      // DON'T encode the coin ID - DeFiLlama expects unencoded chain:address format
+      const url = `${this.priceUrl}/prices/current/${coinId}`;
+      console.log(`Fetching token price for: ${coinId}`);
+      console.log(`Full URL: ${url}`); // Debug log to see the exact URL
       
       const response = await axios.get(url, { 
         timeout: 10000,
@@ -140,12 +146,20 @@ export class DefiLlamaFetcher {
         fetched_at: new Date().toISOString()
       };
     }).catch(error => {
-      console.error(`Error fetching token price for ${chain}:${tokenAddress}:`, error.message);
+      // Enhanced error logging for 503 and rate limit errors
+      if (error.response?.status === 503) {
+        console.error(`DeFiLlama API unavailable (503) for ${chain}:${tokenAddress}. Consider using Pro API key to avoid rate limits.`);
+      } else if (error.response?.status === 429) {
+        console.error(`DeFiLlama rate limit exceeded for ${chain}:${tokenAddress}. Pro API key recommended.`);
+      } else {
+        console.error(`Error fetching token price for ${chain}:${tokenAddress}:`, error.message);
+      }
+      
       return {
         address: tokenAddress,
         chain: chain,
         price: null,
-        error: error.message,
+        error: error.response?.status === 503 ? 'Service temporarily unavailable' : error.message,
         fetched_at: new Date().toISOString()
       };
     });
@@ -177,10 +191,12 @@ export class DefiLlamaFetcher {
       
       try {
         const batchResult = await this.requestQueue.enqueue(batchKey, async () => {
+          // Create comma-separated list of coin IDs (DON'T encode - DeFiLlama expects raw format)
           const addressString = addresses.map(addr => `${chain}:${addr}`).join(',');
           const url = `${this.priceUrl}/prices/current/${addressString}`;
           
           console.log(`Batch fetching ${addresses.length} token prices for ${chain}`);
+          console.log(`Batch URL: ${url}`);
           
           const response = await axios.get(url, { 
             timeout: 15000, // Longer timeout for batch requests

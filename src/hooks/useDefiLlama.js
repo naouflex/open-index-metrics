@@ -24,7 +24,6 @@ export function useDefiLlamaTVL(protocolSlug, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -41,16 +40,9 @@ export function useTokenPrice(tokenAddress, chain = 'ethereum', options = {}) {
     queryKey: ['defillama', 'tokenPrice', chain, tokenAddress?.toLowerCase()],
     queryFn: () => getTokenPrice(tokenAddress, chain),
     enabled: !!tokenAddress,
-    staleTime: 1 * 60 * 1000, // 1 minute (prices change frequently)
+    staleTime: 1 * 60 * 1000, // 1 minute
     cacheTime: 3 * 60 * 1000, // 3 minutes
-    retry: (failureCount, error) => {
-      // Only retry on network errors or 5xx errors, not on 4xx errors
-      if (error?.response?.status >= 400 && error?.response?.status < 500) {
-        return false; // Don't retry client errors
-      }
-      return failureCount < 2; // Max 2 retries for other errors
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 3000), // Exponential backoff, max 3s
+    retry: 2,
     ...options
   });
 }
@@ -69,14 +61,7 @@ export function useMultipleTokenPrices(tokenAddresses, chain = 'ethereum', optio
     enabled: !!tokenAddresses && tokenAddresses.length > 0,
     staleTime: 1 * 60 * 1000, // 1 minute
     cacheTime: 3 * 60 * 1000, // 3 minutes
-    retry: (failureCount, error) => {
-      // Only retry on network errors or 5xx errors
-      if (error?.response?.status >= 400 && error?.response?.status < 500) {
-        return false;
-      }
-      return failureCount < 2;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 3000),
+    retry: 2,
     ...options
   });
 }
@@ -92,10 +77,9 @@ export function useProtocolInfo(protocolSlug, options = {}) {
     queryKey: ['defillama', 'protocolInfo', protocolSlug?.toLowerCase()],
     queryFn: () => getProtocolInfo(protocolSlug),
     enabled: !!protocolSlug,
-    staleTime: 30 * 60 * 1000, // 30 minutes (protocol info changes rarely)
+    staleTime: 30 * 60 * 1000, // 30 minutes
     cacheTime: 60 * 60 * 1000, // 1 hour
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -109,10 +93,9 @@ export function useAllProtocols(options = {}) {
   return useQuery({
     queryKey: ['defillama', 'allProtocols'],
     queryFn: getAllProtocols,
-    staleTime: 60 * 60 * 1000, // 1 hour (list changes rarely)
+    staleTime: 60 * 60 * 1000, // 1 hour
     cacheTime: 2 * 60 * 60 * 1000, // 2 hours
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -131,7 +114,6 @@ export function useProtocolTVLHistory(protocolSlug, options = {}) {
     staleTime: 10 * 60 * 1000, // 10 minutes
     cacheTime: 30 * 60 * 1000, // 30 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -150,7 +132,6 @@ export function useProtocolTVLByChain(protocolSlug, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -236,7 +217,6 @@ export function useProtocolRevenue(protocolSlug, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 } 

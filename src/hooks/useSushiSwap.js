@@ -26,7 +26,6 @@ export function useSushiV3TVL(tokenAddress, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -45,7 +44,6 @@ export function useSushiV3Volume(tokenAddress, options = {}) {
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -64,7 +62,6 @@ export function useSushiV3TokenInfo(tokenAddress, options = {}) {
     staleTime: 10 * 60 * 1000, // 10 minutes
     cacheTime: 30 * 60 * 1000, // 30 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -85,7 +82,6 @@ export function useSushiV2TVL(tokenAddress, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -104,7 +100,6 @@ export function useSushiV2Volume24h(tokenAddress, options = {}) {
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -123,7 +118,6 @@ export function useSushiV2PairsForToken(tokenAddress, options = {}) {
     staleTime: 10 * 60 * 1000, // 10 minutes (pairs don't change often)
     cacheTime: 30 * 60 * 1000, // 30 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -163,7 +157,6 @@ export function useSushiTotalTVL(tokenAddress, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -182,7 +175,6 @@ export function useSushiTotalVolume24h(tokenAddress, options = {}) {
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }

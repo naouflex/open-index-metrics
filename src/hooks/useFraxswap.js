@@ -20,7 +20,6 @@ export function useFraxswapTVL(tokenAddress, options = {}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -39,7 +38,6 @@ export function useFraxswap24hVolume(tokenAddress, options = {}) {
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -58,7 +56,6 @@ export function useFraxswapPairsForToken(tokenAddress, options = {}) {
     staleTime: 10 * 60 * 1000, // 10 minutes (pairs don't change often)
     cacheTime: 30 * 60 * 1000, // 30 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -103,7 +100,6 @@ export function useFraxswapVolumeOptimized(tokenAddress, timeframeHours = 24, op
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -183,7 +179,6 @@ export function useFraxswapMultiTimeframeVolume(tokenAddress, timeframes = [1, 2
       staleTime: hours <= 1 ? 1 * 60 * 1000 : hours <= 24 ? 2 * 60 * 1000 : 5 * 60 * 1000,
       cacheTime: hours <= 1 ? 3 * 60 * 1000 : hours <= 24 ? 5 * 60 * 1000 : 10 * 60 * 1000,
       retry: 2,
-      retryDelay: 1000,
     })
   );
   

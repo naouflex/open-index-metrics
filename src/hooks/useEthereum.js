@@ -32,7 +32,6 @@ export function useTokenBalance(tokenAddress, holderAddress, options = {}) {
     staleTime: 30 * 1000, // 30 seconds (balances change frequently)
     cacheTime: 2 * 60 * 1000, // 2 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -52,7 +51,6 @@ export function useTokenBalanceFormatted(tokenAddress, holderAddress, options = 
     staleTime: 30 * 1000, // 30 seconds
     cacheTime: 2 * 60 * 1000, // 2 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -72,7 +70,6 @@ export function useTokenBalanceWithUSD(tokenAddress, holderAddress, options = {}
     staleTime: 1 * 60 * 1000, // 1 minute (prices change)
     cacheTime: 3 * 60 * 1000, // 3 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -91,7 +88,6 @@ export function useTokenDecimals(tokenAddress, options = {}) {
     staleTime: 60 * 60 * 1000, // 1 hour (decimals don't change)
     cacheTime: 24 * 60 * 60 * 1000, // 24 hours
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -110,7 +106,6 @@ export function useTokenName(tokenAddress, options = {}) {
     staleTime: 60 * 60 * 1000, // 1 hour
     cacheTime: 24 * 60 * 60 * 1000, // 24 hours
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -129,7 +124,6 @@ export function useTokenSymbol(tokenAddress, options = {}) {
     staleTime: 60 * 60 * 1000, // 1 hour
     cacheTime: 24 * 60 * 60 * 1000, // 24 hours
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -148,7 +142,6 @@ export function useTokenTotalSupply(tokenAddress, options = {}) {
     staleTime: 10 * 60 * 1000, // 10 minutes
     cacheTime: 30 * 60 * 1000, // 30 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -169,7 +162,6 @@ export function useAllowance(tokenAddress, ownerAddress, spenderAddress, options
     staleTime: 2 * 60 * 1000, // 2 minutes
     cacheTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -188,7 +180,6 @@ export function useTokenInfo(tokenAddress, options = {}) {
     staleTime: 30 * 60 * 1000, // 30 minutes
     cacheTime: 60 * 60 * 1000, // 1 hour
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -202,10 +193,9 @@ export function useCurrentBlock(options = {}) {
   return useQuery({
     queryKey: ['ethereum', 'currentBlock'],
     queryFn: getCurrentBlock,
-    staleTime: 10 * 1000, // 10 seconds (new blocks every ~12 seconds)
+    staleTime: 10 * 1000, // 10 seconds
     cacheTime: 30 * 1000, // 30 seconds
     retry: 2,
-    retryDelay: 1000,
     refetchInterval: 15 * 1000, // Refetch every 15 seconds
     ...options
   });
@@ -223,7 +213,6 @@ export function useGasPrice(options = {}) {
     staleTime: 10 * 1000, // 10 seconds
     cacheTime: 30 * 1000, // 30 seconds
     retry: 2,
-    retryDelay: 1000,
     refetchInterval: 30 * 1000, // Refetch every 30 seconds
     ...options
   });
@@ -259,7 +248,6 @@ export function useMultipleTokenBalances(tokenAddresses, holderAddress, options 
     staleTime: 30 * 1000, // 30 seconds
     cacheTime: 2 * 60 * 1000, // 2 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }
@@ -302,7 +290,6 @@ export function useMultipleTokenBalancesWithUSD(tokenAddresses, holderAddress, o
     staleTime: 1 * 60 * 1000, // 1 minute
     cacheTime: 3 * 60 * 1000, // 3 minutes
     retry: 2,
-    retryDelay: 1000,
     ...options
   });
 }

@@ -34,6 +34,7 @@ import {
   useFraxswap24hVolume,
   useTokenBalanceWithUSD,
   useTokenPrice,
+  useMultipleTokenPrices,
   useTokenBalance,
   useTokenDecimals,
   useTokenTotalSupply,
@@ -264,33 +265,54 @@ export default function DeFiDashboard() {
     useSushiTotalVolume24h(protocol.govContractAddress, { enabled: allProtocolsLoaded })
   );
 
-  // Load all stable prices from DeFiLlama
-  // Prices are cached at the server level and client level with React Query
-  const allStablePrices = protocols.map(protocol => 
-    useTokenPrice(
-      protocol.stableAddress,
-      protocol.blockchain,
-      { 
-        enabled: allProtocolsLoaded && protocol.stableAddress !== null,
-        staleTime: 1 * 60 * 1000, // 1 minute - prices change frequently
-        cacheTime: 3 * 60 * 1000 // 3 minutes
+  // Batch fetch all token prices from DeFiLlama (much more efficient!)
+  // Collect all token addresses that need prices
+  const allTokenAddresses = useMemo(() => {
+    const addresses = [];
+    protocols.forEach(protocol => {
+      // Add governance token
+      addresses.push(protocol.govContractAddress);
+      // Add stable token if it exists
+      if (protocol.stableAddress) {
+        addresses.push(protocol.stableAddress);
       }
-    )
+    });
+    return addresses;
+  }, []);
+
+  const batchPricesQuery = useMultipleTokenPrices(
+    allTokenAddresses,
+    'ethereum',
+    {
+      enabled: true, 
+      staleTime: 1 * 60 * 1000, 
+      cacheTime: 3 * 60 * 1000
+    }
   );
 
-  // Load all governance token prices from DeFiLlama
-  // Prices are cached at the server level and client level with React Query
-  const allGovTokenPrices = protocols.map(protocol => 
-    useTokenPrice(
-      protocol.govContractAddress,
-      protocol.blockchain,
-      { 
-        enabled: allProtocolsLoaded,
-        staleTime: 1 * 60 * 1000, // 1 minute - prices change frequently
-        cacheTime: 3 * 60 * 1000 // 3 minutes
-      }
-    )
-  );
+  // Parse batch results into individual protocol prices for backward compatibility
+  const allStablePrices = protocols.map(protocol => {
+    if (!protocol.stableAddress) {
+      return { data: null, isLoading: false, isError: false };
+    }
+    const tokenKey = `ethereum:${protocol.stableAddress.toLowerCase()}`;
+    return {
+      data: batchPricesQuery.data?.[tokenKey]?.price || null,
+      isLoading: batchPricesQuery.isLoading,
+      isError: batchPricesQuery.isError,
+      error: batchPricesQuery.error
+    };
+  });
+
+  const allGovTokenPrices = protocols.map(protocol => {
+    const tokenKey = `ethereum:${protocol.govContractAddress.toLowerCase()}`;
+    return {
+      data: batchPricesQuery.data?.[tokenKey]?.price || null,
+      isLoading: batchPricesQuery.isLoading,
+      isError: batchPricesQuery.isError,
+      error: batchPricesQuery.error
+    };
+  });
 
   // Load OPEN Stablecoin Index price from CoinGecko (DeFiLlama doesn't have it)
   const OPEN_TOKEN_ADDRESS = '0x323c03c48660fe31186fa82c289b0766d331ce21';
@@ -1574,6 +1596,8 @@ export default function DeFiDashboard() {
                 shouldLoad={loadedProtocols.has(protocol.originalIndex)}
                 currentWeight={protocolWeights[protocol.ticker]}
                 visibleColumns={visibleColumns}
+                stablePrice={allStablePrices[protocol.originalIndex]}
+                govTokenPrice={allGovTokenPrices[protocol.originalIndex]}
               />
             ))}
           </Tbody>
