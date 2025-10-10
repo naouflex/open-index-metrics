@@ -1525,15 +1525,22 @@ async function refreshAllData() {
       (async () => {
         try {
           // Only refresh core market data 
-          const [marketData, tvlData] = await Promise.allSettled([
-            coinGeckoFetcher.fetchCoinData(protocol.coingeckoId),
-            defiLlamaFetcher.fetchProtocolTVL(protocol.defiLlamaSlug)
-          ]);
+          const promises = [coinGeckoFetcher.fetchCoinData(protocol.coingeckoId)];
+          
+          // Only fetch TVL if defiLlamaSlug is provided (not needed for OPEN Index)
+          if (protocol.defiLlamaSlug) {
+            promises.push(defiLlamaFetcher.fetchProtocolTVL(protocol.defiLlamaSlug));
+          }
+          
+          const results = await Promise.allSettled(promises);
+          const [marketData, tvlData] = results;
 
           if (marketData.status === 'fulfilled') {
-            await cacheManager.setWithSmartTTL(`coingecko:market-data:${protocol.coingeckoId}`, marketData.value, 'market-data');
+            // Use shorter TTL for OPEN Index
+            const dataType = protocol.coingeckoId === 'open-stablecoin-index' ? 'market-data-open-index' : 'market-data';
+            await cacheManager.setWithSmartTTL(`coingecko:market-data:${protocol.coingeckoId}`, marketData.value, dataType);
           }
-          if (tvlData.status === 'fulfilled') {
+          if (tvlData && tvlData.status === 'fulfilled') {
             await cacheManager.setWithSmartTTL(`defillama:tvl:${protocol.defiLlamaSlug}`, tvlData.value, 'protocol-tvl');
           }
           

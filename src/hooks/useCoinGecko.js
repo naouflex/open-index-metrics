@@ -24,11 +24,16 @@ import {
  * @returns {object} Query result with market data
  */
 export function useCoinGeckoMarketData(coinId, options = {}) {
+  // Use shorter staleTime for OPEN Index to ensure frequent updates
+  const staleTime = coinId === 'open-stablecoin-index' 
+    ? 3 * 60 * 1000  // 3 minutes for OPEN Index
+    : 5 * 60 * 1000; // 5 minutes for other coins
+  
   return useQuery({
     queryKey: ['coingecko', 'marketData', coinId],
     queryFn: () => fetchCoinGeckoMarketData(coinId),
     enabled: !!coinId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: staleTime,
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: 2,
     ...options

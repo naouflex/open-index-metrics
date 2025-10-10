@@ -327,8 +327,8 @@ export default function DeFiDashboard() {
   const OPEN_COINGECKO_ID = 'open-stablecoin-index';
   const openIndexPriceCG = useCoinGeckoMarketData(OPEN_COINGECKO_ID, { 
     enabled: true,
-    staleTime: 1 * 60 * 1000, // 1 minute - price changes frequently
-    cacheTime: 3 * 60 * 1000 // 3 minutes
+    staleTime: 3 * 60 * 1000, // 3 minutes - matches backend cache TTL
+    cacheTime: 10 * 60 * 1000 // 10 minutes
   });
   
   // Extract the price from CoinGecko market data
