@@ -38,7 +38,8 @@ import {
   useTokenBalance,
   useTokenDecimals,
   useTokenTotalSupply,
-  useProtocolRevenue
+  useProtocolRevenue,
+  useProtocolInfo
 } from '../hooks/index.js';
 
 import ProtocolRow from './ProtocolRow.jsx';
@@ -87,6 +88,8 @@ const COLUMN_DEFINITIONS = {
   nextReleasePercentage: 'Next 12 month release %',
   emissionsCatalyst: 'Emissions, unlocks catalyst',
   protocolTVL: 'Protocol TVL',
+  tvlGrowth12m: 'TVL Growth (12m %)',
+  tvlGrowthMonthlyAvg: 'Avg Monthly TVL Growth %',
   revenue24h: 'Revenue (24h)',
   revenue7d: 'Revenue (7d avg)',
   revenueAllTime: 'Revenue (All Time)',
@@ -181,6 +184,11 @@ export default function DeFiDashboard() {
   // Load revenue data for all protocols
   const allProtocolRevenue = protocols.map(protocol =>
     useProtocolRevenue(protocol.defiLlamaSlug, { enabled: allProtocolsLoaded })
+  );
+  
+  // Load protocol info for TVL history (to calculate 12-month growth)
+  const allProtocolInfo = protocols.map(protocol =>
+    useProtocolInfo(protocol.defiLlamaSlug, { enabled: allProtocolsLoaded })
   );
   
   // Load FXN holder balance for sorting (only for FXN protocol)
@@ -543,6 +551,47 @@ export default function DeFiDashboard() {
       const revenueAnnualized24h = revenue24h * 365;
       const revenueAnnualized7d = revenue7d * 365;
       
+      // Calculate 12-month TVL growth and average monthly growth rate
+      const protocolInfoData = allProtocolInfo[index];
+      let tvlGrowth12m = 0;
+      let tvlGrowthMonthlyAvg = 0;
+      
+      if (protocolInfoData?.data?.tvl && Array.isArray(protocolInfoData.data.tvl)) {
+        const tvlHistory = protocolInfoData.data.tvl;
+        const currentTvl = protocolTVL;
+        
+        if (tvlHistory.length > 0 && currentTvl > 0) {
+          // Find TVL from approximately 12 months ago (365 days) for 12m growth
+          const now = Math.floor(Date.now() / 1000);
+          const twelveMonthsAgo = now - (365 * 24 * 60 * 60);
+          
+          let closestTvlPoint = null;
+          let closestTimeDiff = Infinity;
+          
+          for (const point of tvlHistory) {
+            const timeDiff = Math.abs(point.date - twelveMonthsAgo);
+            if (timeDiff < closestTimeDiff) {
+              closestTimeDiff = timeDiff;
+              closestTvlPoint = point;
+            }
+          }
+          
+          if (closestTvlPoint && closestTvlPoint.totalLiquidityUSD > 0) {
+            tvlGrowth12m = ((currentTvl - closestTvlPoint.totalLiquidityUSD) / closestTvlPoint.totalLiquidityUSD) * 100;
+          }
+          
+          // Calculate average monthly growth rate from first data point to current
+          const firstPoint = tvlHistory[0];
+          if (firstPoint && firstPoint.totalLiquidityUSD > 0) {
+            const monthsElapsed = (now - firstPoint.date) / (30 * 24 * 60 * 60);
+            if (monthsElapsed > 1) {
+              // Compound monthly growth rate: ((Current/Initial)^(1/months) - 1) * 100
+              tvlGrowthMonthlyAvg = (Math.pow(currentTvl / firstPoint.totalLiquidityUSD, 1 / monthsElapsed) - 1) * 100;
+            }
+          }
+        }
+      }
+      
       // Calculate revenue ratios (both 24h and 7d basis)
       const revenueToMarketCap24h = marketCap > 0 ? revenueAnnualized24h / marketCap : 0;
       const revenueToTVL24h = protocolTVL > 0 ? revenueAnnualized24h / protocolTVL : 0;
@@ -585,6 +634,8 @@ export default function DeFiDashboard() {
           nextEmissions: protocol.nextEmissions,
           nextReleasePercentage,
           protocolTVL,
+          tvlGrowth12m,
+          tvlGrowthMonthlyAvg,
           revenue24h,
           revenue7d,
           revenueAllTime,
@@ -597,7 +648,7 @@ export default function DeFiDashboard() {
         }
       };
     });
-  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allStablePrices, allGovTokenPrices, protocolWeights, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allProtocolRevenue]);
+  }, [allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allStablePrices, allGovTokenPrices, protocolWeights, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allProtocolRevenue, allProtocolInfo]);
 
   // Sort protocols based on current sort configuration
   const sortedProtocols = useMemo(() => {
@@ -657,7 +708,8 @@ export default function DeFiDashboard() {
       allSushiVolume,
       allStablePrices,
       allGovTokenPrices,
-      allProtocolRevenue
+      allProtocolRevenue,
+      allProtocolInfo
     );
   };
 
@@ -1042,6 +1094,41 @@ export default function DeFiDashboard() {
                   w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
                 >
                   TVL
+                </SortableHeader>
+              )}
+              
+              {/* TVL Growth - right after TVL column */}
+              {visibleColumns.tvlGrowth12m && (
+                <SortableHeader 
+                  column="tvlGrowth12m" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="DeFiLlama API" 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "90px", sm: "100px", md: "115px", lg: "125px" }}
+                  maxW={{ base: "90px", sm: "100px", md: "115px", lg: "125px" }}
+                  w={{ base: "90px", sm: "100px", md: "115px", lg: "125px" }}
+                >
+                  TVL Growth (12m %)
+                </SortableHeader>
+              )}
+              
+              {visibleColumns.tvlGrowthMonthlyAvg && (
+                <SortableHeader 
+                  column="tvlGrowthMonthlyAvg" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="calc" 
+                  fontSize="xs"
+                  textAlign="center"
+                  minW={{ base: "100px", sm: "110px", md: "125px", lg: "135px" }}
+                  maxW={{ base: "100px", sm: "110px", md: "125px", lg: "135px" }}
+                  w={{ base: "100px", sm: "110px", md: "125px", lg: "135px" }}
+                >
+                  Avg Monthly TVL Growth %
                 </SortableHeader>
               )}
               
@@ -1598,6 +1685,7 @@ export default function DeFiDashboard() {
                 visibleColumns={visibleColumns}
                 stablePrice={allStablePrices[protocol.originalIndex]}
                 govTokenPrice={allGovTokenPrices[protocol.originalIndex]}
+                protocolInfo={allProtocolInfo[protocol.originalIndex]}
               />
             ))}
           </Tbody>

@@ -43,7 +43,8 @@ export default function ProtocolRow({
   currentWeight, 
   visibleColumns = {}, 
   stablePrice = { data: null, isLoading: false, isError: false }, 
-  govTokenPrice = { data: null, isLoading: false, isError: false }
+  govTokenPrice = { data: null, isLoading: false, isError: false },
+  protocolInfo = { data: null, isLoading: false, isError: false }
 }) {
   // Only load data if shouldLoad is true (staggered loading)
   const coinGeckoData = useCoinGeckoComplete(protocol.coingeckoId, { enabled: shouldLoad });
@@ -173,6 +174,46 @@ export default function ProtocolRow({
     ? ((coinGeckoData.marketData?.data?.circulating_supply || 0) + (fxnHolderBalance.data?.balance || 0))
     : (coinGeckoData.marketData?.data?.circulating_supply || 0);
   const protocolTVL = defiLlamaTVL.data || 0;
+
+  // Calculate 12-month TVL growth and average monthly growth rate
+  let tvlGrowth12m = 0;
+  let tvlGrowthMonthlyAvg = 0;
+  
+  if (protocolInfo?.data?.tvl && Array.isArray(protocolInfo.data.tvl) && protocolTVL > 0) {
+    const tvlHistory = protocolInfo.data.tvl;
+    
+    if (tvlHistory.length > 0) {
+      const now = Math.floor(Date.now() / 1000);
+      
+      // Find TVL from approximately 12 months ago (365 days)
+      const twelveMonthsAgo = now - (365 * 24 * 60 * 60);
+      
+      let closestTvlPoint = null;
+      let closestTimeDiff = Infinity;
+      
+      for (const point of tvlHistory) {
+        const timeDiff = Math.abs(point.date - twelveMonthsAgo);
+        if (timeDiff < closestTimeDiff) {
+          closestTimeDiff = timeDiff;
+          closestTvlPoint = point;
+        }
+      }
+      
+      if (closestTvlPoint && closestTvlPoint.totalLiquidityUSD > 0) {
+        tvlGrowth12m = ((protocolTVL - closestTvlPoint.totalLiquidityUSD) / closestTvlPoint.totalLiquidityUSD) * 100;
+      }
+      
+      // Calculate average monthly growth rate from first data point to current
+      const firstPoint = tvlHistory[0];
+      if (firstPoint && firstPoint.totalLiquidityUSD > 0) {
+        const monthsElapsed = (now - firstPoint.date) / (30 * 24 * 60 * 60);
+        if (monthsElapsed > 1) {
+          // Compound monthly growth rate: ((Current/Initial)^(1/months) - 1) * 100
+          tvlGrowthMonthlyAvg = (Math.pow(protocolTVL / firstPoint.totalLiquidityUSD, 1 / monthsElapsed) - 1) * 100;
+        }
+      }
+    }
+  }
 
   // DEX aggregation
   const dexTVLs = [
@@ -558,6 +599,46 @@ export default function ProtocolRow({
           <Skeleton isLoaded={!isLoading}>
             <Text fontSize="sm" color={coinGeckoTVL > 0 ? "blue.500" : "gray.400"} fontWeight={coinGeckoTVL > 0 ? "semibold" : "normal"}>
               {coinGeckoTVL > 0 ? formatNumber(coinGeckoTVL) : "N/A"}
+            </Text>
+          </Skeleton>
+        </Td>
+      )}
+      
+      {/* TVL Growth 12m - right after TVL column */}
+      {visibleColumns.tvlGrowth12m && (
+        <Td
+          textAlign="center"
+          minW={{ base: "90px", sm: "100px", md: "115px", lg: "125px" }}
+          maxW={{ base: "90px", sm: "100px", md: "115px", lg: "125px" }}
+          w={{ base: "90px", sm: "100px", md: "115px", lg: "125px" }}
+        >
+          <Skeleton isLoaded={!protocolInfo.isLoading}>
+            <Text 
+              fontSize="sm" 
+              fontWeight="semibold"
+              color={tvlGrowth12m >= 0 ? useColorModeValue('green.600', 'green.400') : useColorModeValue('red.600', 'red.400')}
+            >
+              {tvlGrowth12m !== 0 ? `${tvlGrowth12m > 0 ? '+' : ''}${tvlGrowth12m.toFixed(1)}%` : 'N/A'}
+            </Text>
+          </Skeleton>
+        </Td>
+      )}
+      
+      {/* Average Monthly TVL Growth */}
+      {visibleColumns.tvlGrowthMonthlyAvg && (
+        <Td
+          textAlign="center"
+          minW={{ base: "100px", sm: "110px", md: "125px", lg: "135px" }}
+          maxW={{ base: "100px", sm: "110px", md: "125px", lg: "135px" }}
+          w={{ base: "100px", sm: "110px", md: "125px", lg: "135px" }}
+        >
+          <Skeleton isLoaded={!protocolInfo.isLoading}>
+            <Text 
+              fontSize="sm" 
+              fontWeight="semibold"
+              color={tvlGrowthMonthlyAvg >= 0 ? useColorModeValue('green.600', 'green.400') : useColorModeValue('red.600', 'red.400')}
+            >
+              {tvlGrowthMonthlyAvg !== 0 ? `${tvlGrowthMonthlyAvg > 0 ? '+' : ''}${tvlGrowthMonthlyAvg.toFixed(2)}%` : 'N/A'}
             </Text>
           </Skeleton>
         </Td>

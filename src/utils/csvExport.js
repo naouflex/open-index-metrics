@@ -2,7 +2,7 @@ import { calculateYearsOnChain } from '../config/protocols.js';
 
 // ================= CSV EXPORT FUNCTION =================
 
-export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allStablePrices, allGovTokenPrices, allProtocolRevenue) {
+export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxnHolderBalances, allInvToken1Balances, allInvToken2Balances, allAlcxDeadBalances, allFraxswapTVLForFrax, allFraxswapVolumeForFrax, allCurveTVL, allCurveVolume, allUniswapTVL, allUniswapVolume, allBalancerTVL, allBalancerVolume, allSushiTVL, allSushiVolume, allStablePrices, allGovTokenPrices, allProtocolRevenue, allProtocolInfo) {
   const headers = [
     'Protocol',
     'Name',
@@ -42,6 +42,8 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     'Next 12mo Release %',
     'Emissions Catalyst',
     'Protocol TVL',
+    'TVL Growth (12m %)',
+    'Avg Monthly TVL Growth %',
     'Revenue (24h)',
     'Revenue (7d avg)',
     'Revenue (All Time)',
@@ -134,6 +136,44 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     const revenueAnnualized24h = revenue24h * 365;
     const revenueAnnualized7d = revenue7d * 365;
     
+    // Calculate 12-month TVL growth and average monthly growth rate
+    const protocolInfoData = allProtocolInfo[index];
+    let tvlGrowth12m = 0;
+    let tvlGrowthMonthlyAvg = 0;
+    
+    if (protocolInfoData?.data?.tvl && Array.isArray(protocolInfoData.data.tvl) && protocolTVL > 0) {
+      const tvlHistory = protocolInfoData.data.tvl;
+      
+      if (tvlHistory.length > 0) {
+        const now = Math.floor(Date.now() / 1000);
+        const twelveMonthsAgo = now - (365 * 24 * 60 * 60);
+        
+        let closestTvlPoint = null;
+        let closestTimeDiff = Infinity;
+        
+        for (const point of tvlHistory) {
+          const timeDiff = Math.abs(point.date - twelveMonthsAgo);
+          if (timeDiff < closestTimeDiff) {
+            closestTimeDiff = timeDiff;
+            closestTvlPoint = point;
+          }
+        }
+        
+        if (closestTvlPoint && closestTvlPoint.totalLiquidityUSD > 0) {
+          tvlGrowth12m = ((protocolTVL - closestTvlPoint.totalLiquidityUSD) / closestTvlPoint.totalLiquidityUSD) * 100;
+        }
+        
+        // Calculate average monthly growth rate from first data point to current
+        const firstPoint = tvlHistory[0];
+        if (firstPoint && firstPoint.totalLiquidityUSD > 0) {
+          const monthsElapsed = (now - firstPoint.date) / (30 * 24 * 60 * 60);
+          if (monthsElapsed > 1) {
+            tvlGrowthMonthlyAvg = (Math.pow(protocolTVL / firstPoint.totalLiquidityUSD, 1 / monthsElapsed) - 1) * 100;
+          }
+        }
+      }
+    }
+    
     // Calculate revenue ratios (both 24h and 7d basis)
     const revenueToMarketCap24h = marketCap > 0 ? (revenueAnnualized24h / marketCap) * 100 : 0;
     const revenueToTVL24h = protocolTVL > 0 ? (revenueAnnualized24h / protocolTVL) * 100 : 0;
@@ -179,6 +219,8 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
       nextReleasePercentage.toFixed(2),
       protocol.emissionsCatalyst || 'N/A',
       protocolTVL,
+      tvlGrowth12m !== 0 ? tvlGrowth12m.toFixed(1) : 'N/A',
+      tvlGrowthMonthlyAvg !== 0 ? tvlGrowthMonthlyAvg.toFixed(2) : 'N/A',
       revenue24h,
       revenue7d,
       revenueAllTime,
