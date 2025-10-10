@@ -20,7 +20,7 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     'Volume 30d Avg',
     'TVL',
     'Market Cap / FDV (%)',
-    'Market Cap / TVL (%)',
+    'TVL / Market Cap (%)',
     'TVL / FDV (%)',
     'Max Supply',
     'Total Supply',
@@ -84,7 +84,7 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     
     const yearsOnChain = calculateYearsOnChain(protocol.mainnetLaunch);
     const mcToFdv = fdv > 0 ? (marketCap / fdv) * 100 : 0;
-    const mcToTvl = coinGeckoTVL > 0 ? (marketCap / coinGeckoTVL) * 100 : 0;
+    const tvlToMc = marketCap > 0 ? (coinGeckoTVL / marketCap) * 100 : 0;
     const tvlToFdv = fdv > 0 ? (coinGeckoTVL / fdv) * 100 : 0;
     const circToTotal = totalSupply > 0 ? (circSupply / totalSupply) * 100 : 0;
     const nextReleasePercentage = circSupply > 0 ? (protocol.nextEmissions / circSupply) * 100 : 0;
@@ -157,7 +157,7 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
       volume30d,
       coinGeckoTVL,
       mcToFdv.toFixed(2),
-      mcToTvl.toFixed(2),
+      tvlToMc.toFixed(2),
       tvlToFdv.toFixed(2),
       maxSupply,
       totalSupply,

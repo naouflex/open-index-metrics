@@ -208,7 +208,7 @@ export default function ProtocolRow({
 
   // Ratios
   const mcToFdv = fdv > 0 ? marketCap / fdv : 0;
-  const mcToTvl = coinGeckoTVL > 0 ? marketCap / coinGeckoTVL : 0;
+  const tvlToMc = marketCap > 0 ? coinGeckoTVL / marketCap : 0;
   const tvlToFdv = fdv > 0 ? coinGeckoTVL / fdv : 0;
   const circToTotal = totalSupply > 0 ? circSupply / totalSupply : 0;
   const nextReleasePercentage = circSupply > 0 ? protocol.nextEmissions / circSupply : 0;
@@ -581,7 +581,7 @@ export default function ProtocolRow({
         </Td>
       )}
 
-      {visibleColumns.mcToTvl && (
+      {visibleColumns.tvlToMc && (
         <Td
           textAlign="center"
           minW={{ base: "80px", sm: "95px", md: "110px", lg: "120px" }}
@@ -590,10 +590,10 @@ export default function ProtocolRow({
         >
           <Text
             fontSize="sm"
-            color={getColorForMetric(mcToTvl * 100, 'mcToTvl', colorMode)}
+            color={getColorForMetric(tvlToMc * 100, 'tvlToMc', colorMode)}
             fontWeight="semibold"
           >
-            {formatPercentage(mcToTvl)}
+            {formatPercentage(tvlToMc)}
           </Text>
         </Td>
       )}
