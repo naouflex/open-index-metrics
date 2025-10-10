@@ -18,6 +18,10 @@ COPY . .
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
+
+# Create data directory with proper ownership
+RUN mkdir -p /app/data && chown -R nodejs:nodejs /app
+
 USER nodejs
 
 # Health check
