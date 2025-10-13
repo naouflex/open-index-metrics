@@ -113,7 +113,7 @@ export {
   useTokenDecimals,
   useTokenName,
   useTokenSymbol,
-  useTokenTotalSupply, // Renamed to avoid conflict with CoinGecko's useTotalSupply
+  useTokenTotalSupply, // Avoid conflict with CoinGecko's useTotalSupply
   useAllowance,
   useTokenInfo,
   useCurrentBlock,
@@ -121,6 +121,8 @@ export {
   useMultipleTokenBalances,
   useMultipleTokenBalancesWithUSD,
   usePortfolioValue,
-  useEthereumUtils
+  useEthereumUtils,
+  useCurveGetDy,
+  useOPENIndexPrice
 } from './useEthereum.js';
 

@@ -1477,6 +1477,25 @@ app.get('/api/ethereum/allowance/:tokenAddress/:ownerAddress/:spenderAddress', a
   }
 });
 
+// Get Curve pool get_dy (exchange rate) -> /api/ethereum/curve-get-dy/:poolAddress/:i/:j/:dx
+app.get('/api/ethereum/curve-get-dy/:poolAddress/:i/:j/:dx', async (req, res) => {
+  try {
+    const { poolAddress, i, j, dx } = req.params;
+    const cacheKey = `ethereum:curve-get-dy:${poolAddress}:${i}:${j}:${dx}`;
+    
+    let data = await cacheManager.get(cacheKey);
+    if (!data) {
+      data = await ethereumFetcher.getCurveGetDy(poolAddress, parseInt(i), parseInt(j), dx);
+      await cacheManager.set(cacheKey, data, 60); // 1 minute cache for exchange rates
+    }
+    
+    res.json(data);
+  } catch (error) {
+    logger.error('Curve get_dy error:', error);
+    res.status(500).json({ error: 'Failed to fetch exchange rate' });
+  }
+});
+
 // Legacy generic endpoint
 app.get('/api/ethereum/:method', async (req, res) => {
   try {

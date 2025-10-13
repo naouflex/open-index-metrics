@@ -428,4 +428,50 @@ export class EthereumFetcher {
     
     return result;
   }
+
+  /**
+   * Get exchange rate from Curve pool using get_dy function
+   * @param {string} poolAddress - Curve pool address
+   * @param {number} i - Index of input token
+   * @param {number} j - Index of output token  
+   * @param {string} dx - Amount of input token (in wei/smallest unit)
+   * @returns {Promise<object>} - Exchange rate information
+   */
+  async getCurveGetDy(poolAddress, i, j, dx) {
+    try {
+      // Curve get_dy function signature: get_dy(uint256,uint256,uint256)
+      // Function selector: 0x556d6e9f
+      const methodId = '0x556d6e9f';
+      
+      // Encode parameters
+      const iHex = i.toString(16).padStart(64, '0');
+      const jHex = j.toString(16).padStart(64, '0');
+      const dxHex = BigInt(dx).toString(16).padStart(64, '0');
+      
+      const data = methodId + iHex + jHex + dxHex;
+      
+      const result = await this.makeRpcCall('eth_call', [
+        {
+          to: poolAddress,
+          data: data
+        },
+        'latest'
+      ]);
+      
+      // Parse the result (uint256)
+      const dy = BigInt(result);
+      
+      return {
+        poolAddress,
+        inputIndex: i,
+        outputIndex: j,
+        inputAmount: dx,
+        outputAmount: dy.toString(),
+        fetched_at: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error(`Error calling get_dy on pool ${poolAddress}:`, error.message);
+      throw error;
+    }
+  }
 } 

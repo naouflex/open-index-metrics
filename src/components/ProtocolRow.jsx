@@ -170,9 +170,7 @@ export default function ProtocolRow({
   const totalSupply = protocol.ticker === 'ALCX'
     ? ((coinGeckoData.marketData?.data?.total_supply || 0) - (alcxDeadBalance.data?.balance || 0))
     : (coinGeckoData.marketData?.data?.total_supply || 0);
-  const circSupply = protocol.ticker === 'FXN'
-    ? ((coinGeckoData.marketData?.data?.circulating_supply || 0) + (fxnHolderBalance.data?.balance || 0))
-    : (coinGeckoData.marketData?.data?.circulating_supply || 0);
+  const circSupply = coinGeckoData.marketData?.data?.circulating_supply || 0;
   const protocolTVL = defiLlamaTVL.data || 0;
 
   // Calculate 12-month TVL growth and average monthly growth rate
@@ -739,15 +737,7 @@ export default function ProtocolRow({
           w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
         >
           <Skeleton isLoaded={!isLoading}>
-            <HStack spacing={1} justify="center">
-              <Text fontSize="sm">{formatSupply(circSupply)}</Text>
-              {protocol.ticker === 'FXN' && (
-                <SpecialTreatmentBadge
-                  explanation="Circulating supply includes veFXN contract balance (tokens)"
-                  protocolTicker={protocol.ticker}
-                />
-              )}
-            </HStack>
+            <Text fontSize="sm">{formatSupply(circSupply)}</Text>
           </Skeleton>
         </Td>
       )}

@@ -663,6 +663,16 @@ export async function getTokenBalanceWithUSD(tokenAddress, holderAddress) {
   }
 }
 
+export async function getCurveGetDy(poolAddress, i, j, dx) {
+  try {
+    const response = await cacheApi.get(`/ethereum/curve-get-dy/${poolAddress}/${i}/${j}/${dx}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching Curve get_dy:`, error);
+    throw error;
+  }
+}
+
 // ================= POOL CACHE FUNCTIONS =================
 
 /**

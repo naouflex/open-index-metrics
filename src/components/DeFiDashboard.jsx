@@ -39,7 +39,8 @@ import {
   useTokenDecimals,
   useTokenTotalSupply,
   useProtocolRevenue,
-  useProtocolInfo
+  useProtocolInfo,
+  useOPENIndexPrice
 } from '../hooks/index.js';
 
 import ProtocolRow from './ProtocolRow.jsx';
@@ -322,21 +323,18 @@ export default function DeFiDashboard() {
     };
   });
 
-  // Load OPEN Stablecoin Index price from CoinGecko (DeFiLlama doesn't have it)
+  // Load OPEN Stablecoin Index price from Curve OPEN/WETH pool (real-time)
   const OPEN_TOKEN_ADDRESS = '0x323c03c48660fe31186fa82c289b0766d331ce21';
-  const OPEN_COINGECKO_ID = 'open-stablecoin-index';
-  const openIndexPriceCG = useCoinGeckoMarketData(OPEN_COINGECKO_ID, { 
-    enabled: true,
-    staleTime: 3 * 60 * 1000, // 3 minutes - matches backend cache TTL
-    cacheTime: 10 * 60 * 1000 // 10 minutes
-  });
+  const openIndexPriceQuery = useOPENIndexPrice({ enabled: true });
   
-  // Extract the price from CoinGecko market data
+  // Extract the price from Curve pool calculation
   const openIndexPrice = {
-    data: openIndexPriceCG.data?.current_price || null,
-    isLoading: openIndexPriceCG.isLoading,
-    isError: openIndexPriceCG.isError,
-    error: openIndexPriceCG.error
+    data: openIndexPriceQuery.data?.price || null,
+    isLoading: openIndexPriceQuery.isLoading,
+    isError: openIndexPriceQuery.isError,
+    error: openIndexPriceQuery.error,
+    source: openIndexPriceQuery.data?.source || 'Curve OPEN/WETH Pool',
+    wethPrice: openIndexPriceQuery.data?.wethPrice || null
   };
 
   // Get protocols with "current" status for theoretical price calculation
@@ -508,9 +506,7 @@ export default function DeFiDashboard() {
       const totalSupply = protocol.ticker === 'ALCX' 
         ? ((coinGeckoData?.marketData?.data?.total_supply || 0) - (alcxDeadBalance?.data?.balance || 0))
         : (coinGeckoData?.marketData?.data?.total_supply || 0);
-      const circSupply = protocol.ticker === 'FXN'
-        ? ((coinGeckoData?.marketData?.data?.circulating_supply || 0) + (fxnHolderBalance?.data?.balance || 0))
-        : (coinGeckoData?.marketData?.data?.circulating_supply || 0);
+      const circSupply = coinGeckoData?.marketData?.data?.circulating_supply || 0;
       const protocolTVL = defiLlamaTVL?.data || 0;
       
       const yearsOnChain = calculateYearsOnChain(protocol.mainnetLaunch);
@@ -759,8 +755,8 @@ export default function DeFiDashboard() {
                      openIndexPrice.isError ? 'Error' :
                      openIndexPrice.data ? `$${Number(openIndexPrice.data).toFixed(4)}` : 'N/A'}
                   </Text>
-                  <Badge colorScheme={openIndexPrice.data ? "blue" : "gray"} fontSize="xs">
-                    {openIndexPrice.data ? 'Live' : 'Unavailable'}
+                  <Badge colorScheme={openIndexPrice.data ? "green" : "gray"} fontSize="xs">
+                    {openIndexPrice.data ? 'Curve Pool' : 'Unavailable'}
                   </Badge>
                 </HStack>
               </VStack>

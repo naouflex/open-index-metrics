@@ -12,7 +12,9 @@ import {
   getTokenBalanceFormatted,
   getTokenBalanceWithUSD,
   formatTokenAmount,
-  toRawAmount
+  toRawAmount,
+  getCurveGetDy,
+  getTokenPrice
 } from '../services/cache-client.js';
 
 // ================= ETHEREUM HOOKS =================
@@ -325,6 +327,86 @@ export function usePortfolioValue(tokenAddresses, holderAddress, options = {}) {
     staleTime: 1 * 60 * 1000, // 1 minute
     cacheTime: 3 * 60 * 1000, // 3 minutes
   });
+}
+
+/**
+ * Hook to get exchange rate from Curve pool using get_dy
+ * @param {string} poolAddress - Curve pool address
+ * @param {number} i - Index of input token
+ * @param {number} j - Index of output token
+ * @param {string} dx - Amount of input token in wei
+ * @param {object} options - Query options
+ * @returns {object} Query result with exchange rate data
+ */
+export function useCurveGetDy(poolAddress, i, j, dx, options = {}) {
+  return useQuery({
+    queryKey: ['ethereum', 'curveGetDy', poolAddress?.toLowerCase(), i, j, dx],
+    queryFn: () => getCurveGetDy(poolAddress, i, j, dx),
+    enabled: !!poolAddress && i !== undefined && j !== undefined && !!dx,
+    staleTime: 1 * 60 * 1000, // 1 minute (exchange rates change frequently)
+    refetchInterval: 3 * 60 * 1000, // Auto-refetch every 3 minutes
+    refetchOnWindowFocus: true, // Refetch on window focus
+    cacheTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    ...options
+  });
+}
+
+/**
+ * Hook to get OPEN Index token price from Curve pool
+ * Calculates price by getting OPEN/WETH exchange rate and converting to USD
+ * @param {object} options - Query options
+ * @returns {object} Query result with OPEN price in USD
+ */
+export function useOPENIndexPrice(options = {}) {
+  const OPEN_WETH_POOL = '0xcBcD4d46FF017B90C0d1cDA1CbD20086b0901738';
+  const WETH_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
+  
+  // Get 1 OPEN (18 decimals) worth of WETH using get_dy
+  // Pool indices: i=0 (WETH), j=1 (OPEN)
+  // To convert OPEN to WETH: i=1 (OPEN), j=0 (WETH), dx=1e18 (1 OPEN)
+  const getDyQuery = useCurveGetDy(OPEN_WETH_POOL, 1, 0, '1000000000000000000', options);
+  
+  // Get WETH price in USD
+  const wethPriceQuery = useQuery({
+    queryKey: ['defillama', 'tokenPrice', WETH_ADDRESS],
+    queryFn: () => getTokenPrice(WETH_ADDRESS),
+    enabled: true,
+    staleTime: 1 * 60 * 1000,
+    refetchInterval: 3 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    cacheTime: 5 * 60 * 1000,
+    retry: 2
+  });
+  
+  // Calculate the price from both queries
+  const isLoading = getDyQuery.isLoading || wethPriceQuery.isLoading;
+  const isError = getDyQuery.isError || wethPriceQuery.isError;
+  const error = getDyQuery.error || wethPriceQuery.error;
+  
+  let data = null;
+  if (getDyQuery.data && wethPriceQuery.data) {
+    // getDyQuery.data.outputAmount is how much WETH you get for 1 OPEN (in wei)
+    const wethPerOpen = Number(getDyQuery.data.outputAmount) / 1e18;
+    const wethPriceUSD = Number(wethPriceQuery.data);
+    const openPriceUSD = wethPerOpen * wethPriceUSD;
+    
+    data = {
+      price: openPriceUSD,
+      wethPerOpen: wethPerOpen,
+      wethPrice: wethPriceUSD,
+      source: 'Curve OPEN/WETH Pool',
+      poolAddress: OPEN_WETH_POOL,
+      fetched_at: new Date().toISOString()
+    };
+  }
+  
+  return {
+    data,
+    isLoading,
+    isError,
+    error
+  };
 }
 
 /**
