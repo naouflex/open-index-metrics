@@ -154,10 +154,7 @@ export default function ProtocolRow({
     (protocol.ticker === 'ALCX' && alcxDeadBalance.isError) ||
     (protocol.ticker === 'FRAX' && (fraxswapTVLForFrax.isError || fraxswapVolumeForFrax.isError));
 
-  // For FXN protocol, add veFXN balance USD to market cap
-  const marketCap = protocol.ticker === 'FXN'
-    ? ((coinGeckoData.marketData?.data?.market_cap || 0) + (fxnHolderBalance.data?.balanceUSD || 0))
-    : (coinGeckoData.marketData?.data?.market_cap || 0);
+  const marketCap = coinGeckoData.marketData?.data?.market_cap || 0;
   const fdv = coinGeckoData.marketData?.data?.fdv || 0;
   const volume24h = coinGeckoData.marketData?.data?.volume_24h || 0;
   const volume30d = coinGeckoData.volume30d?.data || 0;
@@ -529,15 +526,7 @@ export default function ProtocolRow({
           w={{ base: "75px", sm: "85px", md: "100px", lg: "110px" }}
         >
           <Skeleton isLoaded={!isLoading}>
-            <HStack spacing={1} justify="center">
-              <Text fontSize="sm">{formatNumber(marketCap)}</Text>
-              {protocol.ticker === 'FXN' && (
-                <SpecialTreatmentBadge
-                  explanation="Market cap includes veFXN contract balance (not included in CoinGecko)"
-                  protocolTicker={protocol.ticker}
-                />
-              )}
-            </HStack>
+            <Text fontSize="sm">{formatNumber(marketCap)}</Text>
           </Skeleton>
         </Td>
       )}

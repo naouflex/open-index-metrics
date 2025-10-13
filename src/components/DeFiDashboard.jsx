@@ -489,10 +489,7 @@ export default function DeFiDashboard() {
       const fraxswapTVLForFrax = allFraxswapTVLForFrax[index];
       const fraxswapVolumeForFrax = allFraxswapVolumeForFrax[index];
       
-      // For FXN protocol, add holder balance USD to market cap
-      const marketCap = protocol.ticker === 'FXN' 
-        ? ((coinGeckoData?.marketData?.data?.market_cap || 0) + (fxnHolderBalance?.data?.balanceUSD || 0))
-        : (coinGeckoData?.marketData?.data?.market_cap || 0);
+      const marketCap = coinGeckoData?.marketData?.data?.market_cap || 0;
       const fdv = coinGeckoData?.marketData?.data?.fdv || 0;
       const volume24h = coinGeckoData?.marketData?.data?.volume_24h || 0;
       const volume30d = coinGeckoData?.volume30d?.data || 0;
