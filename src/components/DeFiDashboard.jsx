@@ -574,16 +574,10 @@ export default function DeFiDashboard() {
           
           if (closestTvlPoint && closestTvlPoint.totalLiquidityUSD > 0) {
             tvlGrowth12m = ((currentTvl - closestTvlPoint.totalLiquidityUSD) / closestTvlPoint.totalLiquidityUSD) * 100;
-          }
-          
-          // Calculate average monthly growth rate from first data point to current
-          const firstPoint = tvlHistory[0];
-          if (firstPoint && firstPoint.totalLiquidityUSD > 0) {
-            const monthsElapsed = (now - firstPoint.date) / (30 * 24 * 60 * 60);
-            if (monthsElapsed > 1) {
-              // Compound monthly growth rate: ((Current/Initial)^(1/months) - 1) * 100
-              tvlGrowthMonthlyAvg = (Math.pow(currentTvl / firstPoint.totalLiquidityUSD, 1 / monthsElapsed) - 1) * 100;
-            }
+            
+            // Calculate average monthly growth rate over the last 12 months
+            // Compound monthly growth rate: ((Current/12MonthsAgo)^(1/12) - 1) * 100
+            tvlGrowthMonthlyAvg = (Math.pow(currentTvl / closestTvlPoint.totalLiquidityUSD, 1 / 12) - 1) * 100;
           }
         }
       }
@@ -1218,7 +1212,7 @@ export default function DeFiDashboard() {
                   maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
                   w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
                 >
-                  Circ Supply<br/>(public tokens, incl ve)
+                  Circ Supply
                 </SortableHeader>
               )}
               {visibleColumns.circToTotal && (
