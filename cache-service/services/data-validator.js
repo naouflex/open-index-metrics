@@ -46,12 +46,74 @@ export class DataValidator {
         return this.validateTVLData(newData, previousData);
       
       case 'token-price':
-        return this.validatePriceData(newData, previousData);
+        return this.validateTokenPriceBatch(newData, previousData);
       
       default:
         // For unknown types, do basic validation
         return this.validateGeneric(newData, previousData);
     }
+  }
+
+  /**
+   * Validate token price batch data (DefiLlama batch responses)
+   */
+  validateTokenPriceBatch(newData, previousData) {
+    // For batch price data (object with token keys)
+    if (typeof newData === 'object' && !Array.isArray(newData)) {
+      // Check if this is a batch response (has ethereum:0x... keys)
+      const keys = Object.keys(newData);
+      const hasBatchFormat = keys.some(key => key.includes(':0x'));
+      
+      if (hasBatchFormat) {
+        // Validate batch price data
+        let validCount = 0;
+        let totalCount = 0;
+        let unavailableCount = 0;
+        
+        for (const [tokenKey, tokenData] of Object.entries(newData)) {
+          totalCount++;
+          
+          // Check if this token's price is valid
+          if (tokenData && !tokenData._unavailable && tokenData.price !== null && tokenData.price !== undefined) {
+            validCount++;
+          } else {
+            unavailableCount++;
+            console.warn(`Token price unavailable: ${tokenKey}`, tokenData?.error);
+          }
+        }
+        
+        // If more than 50% of tokens are unavailable, reject the whole batch
+        if (unavailableCount > totalCount / 2) {
+          return {
+            isValid: false,
+            reason: `Too many unavailable prices: ${unavailableCount}/${totalCount}`,
+            useStale: true
+          };
+        }
+        
+        // If all tokens are unavailable, definitely reject
+        if (validCount === 0) {
+          return {
+            isValid: false,
+            reason: 'All token prices unavailable',
+            useStale: true
+          };
+        }
+        
+        // Partial success is OK - log it
+        if (unavailableCount > 0) {
+          console.log(`Batch price validation: ${validCount}/${totalCount} tokens valid, ${unavailableCount} unavailable`);
+        }
+        
+        return {
+          isValid: true,
+          reason: `Batch validated: ${validCount}/${totalCount} tokens`
+        };
+      }
+    }
+    
+    // Single price data (fallback to existing logic)
+    return this.validatePriceData(newData, previousData);
   }
 
   /**
@@ -271,6 +333,45 @@ export class DataValidator {
   mergeWithStaleData(newData, staleData) {
     if (!staleData) return newData;
 
+    // Check if this is batch price data (has ethereum:0x... keys)
+    const keys = Object.keys(newData);
+    const hasBatchFormat = keys.some(key => key.includes(':0x'));
+    
+    if (hasBatchFormat) {
+      // Merge batch price data token by token
+      const merged = { ...newData };
+      let mergedCount = 0;
+      
+      for (const [tokenKey, tokenData] of Object.entries(newData)) {
+        const staleTokenData = staleData[tokenKey];
+        
+        // If new token data is unavailable but we have stale data, use stale
+        if (tokenData?._unavailable && staleTokenData && !staleTokenData._unavailable) {
+          merged[tokenKey] = {
+            ...staleTokenData,
+            _from_stale: true,
+            _stale_data_timestamp: staleTokenData.fetched_at
+          };
+          mergedCount++;
+        } else if (tokenData?.price == null && staleTokenData?.price != null) {
+          // If new price is null but stale has a price, use stale
+          merged[tokenKey] = {
+            ...staleTokenData,
+            _from_stale: true,
+            _stale_data_timestamp: staleTokenData.fetched_at
+          };
+          mergedCount++;
+        }
+      }
+      
+      if (mergedCount > 0) {
+        console.log(`Merged ${mergedCount} token prices from stale cache`);
+      }
+      
+      return merged;
+    }
+
+    // Regular single-object data merge
     const merged = { ...newData };
 
     // For each numeric field, prefer non-zero values

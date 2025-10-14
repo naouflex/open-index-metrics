@@ -216,26 +216,47 @@ export class DefiLlamaFetcher {
             const tokenKey = `${chain}:${address}`;
             const coinData = batchResult.coins[tokenKey];
             
-            results[tokenKey] = coinData ? {
-              address: address,
-              chain: chain,
-              price: coinData.price,
-              symbol: coinData.symbol || '',
-              decimals: coinData.decimals || 18,
-              timestamp: coinData.timestamp,
-              fetched_at: new Date().toISOString()
-            } : {
+            if (coinData && coinData.price !== null && coinData.price !== undefined) {
+              results[tokenKey] = {
+                address: address,
+                chain: chain,
+                price: coinData.price,
+                symbol: coinData.symbol || '',
+                decimals: coinData.decimals || 18,
+                timestamp: coinData.timestamp,
+                fetched_at: new Date().toISOString()
+              };
+            } else {
+              // Price not found in response - mark as unavailable
+              results[tokenKey] = {
+                address: address,
+                chain: chain,
+                price: null,
+                error: 'Price not found in DefiLlama response',
+                _unavailable: true,
+                fetched_at: new Date().toISOString()
+              };
+              console.warn(`DefiLlama: Price not found for ${tokenKey}`);
+            }
+          }
+        } else {
+          // No coins object in response
+          console.warn(`DefiLlama: No coins object in batch response for ${chain}`);
+          for (const address of addresses) {
+            const tokenKey = `${chain}:${address}`;
+            results[tokenKey] = {
               address: address,
               chain: chain,
               price: null,
-              error: 'Price not found',
+              error: 'Invalid response structure',
+              _unavailable: true,
               fetched_at: new Date().toISOString()
             };
           }
         }
       } catch (error) {
         console.error(`Error batch fetching prices for ${chain}:`, error.message);
-        // Add error results for this chain
+        // Add error results for this chain with _unavailable flag
         for (const address of addresses) {
           const tokenKey = `${chain}:${address}`;
           results[tokenKey] = {
@@ -243,6 +264,7 @@ export class DefiLlamaFetcher {
             chain: chain,
             price: null,
             error: error.message,
+            _unavailable: true,
             fetched_at: new Date().toISOString()
           };
         }

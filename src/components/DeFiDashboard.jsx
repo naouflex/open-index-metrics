@@ -414,6 +414,7 @@ export default function DeFiDashboard() {
     let allDataLoaded = true;
     const weights = {};
     const protocolValues = {};
+    const skippedProtocols = [];
     
     currentProtocols.forEach((protocol, index) => {
       const balance = openHoldingsBalances[index];
@@ -426,13 +427,33 @@ export default function DeFiDashboard() {
         return;
       }
       
-      if (balance.data && decimals.data && price.data) {
+      // Check for null/undefined (error) vs 0 (legitimate value)
+      // balance.data can be 0 (no holdings) - that's OK
+      // decimals.data should never be null (defaults to 18)
+      // price.data can be null (API error) - that's NOT OK
+      const hasValidBalance = balance.data !== null && balance.data !== undefined;
+      const hasValidDecimals = decimals.data !== null && decimals.data !== undefined && decimals.data > 0;
+      const hasValidPrice = price.data !== null && price.data !== undefined;
+      
+      if (hasValidBalance && hasValidDecimals && hasValidPrice) {
         const formattedBalance = balance.data / Math.pow(10, decimals.data);
         const tokenValue = formattedBalance * Number(price.data);
         protocolValues[protocol.ticker] = tokenValue;
         totalValue += tokenValue;
+      } else {
+        // Skip this protocol but log why
+        const missing = [];
+        if (!hasValidBalance) missing.push(`balance=${balance.data}`);
+        if (!hasValidDecimals) missing.push(`decimals=${decimals.data}`);
+        if (!hasValidPrice) missing.push(`price=${price.data}`);
+        skippedProtocols.push(`${protocol.ticker} (${missing.join(', ')})`);
       }
     });
+    
+    // Log skipped protocols for debugging
+    if (skippedProtocols.length > 0 && allDataLoaded) {
+      console.warn(`NAV Calculation: Skipping ${skippedProtocols.length}/${currentProtocols.length} protocols due to missing data:`, skippedProtocols);
+    }
     
     if (!allDataLoaded || openTotalSupply.isLoading || openDecimals.isLoading) {
       return { theoreticalPrice: null, protocolWeights: {} };
@@ -449,6 +470,15 @@ export default function DeFiDashboard() {
     if (openTotalSupply.data && openDecimals.data && openTotalSupply.data > 0) {
       const formattedSupply = openTotalSupply.data / Math.pow(10, openDecimals.data);
       price = totalValue / formattedSupply;
+      
+      // Log successful calculation
+      if (price && skippedProtocols.length === 0) {
+        console.log(`NAV Calculated: $${price.toFixed(4)} from ${Object.keys(protocolValues).length} protocols, Total Value: $${totalValue.toLocaleString()}`);
+      } else if (price && skippedProtocols.length > 0) {
+        console.warn(`NAV Calculated: $${price.toFixed(4)} from ${Object.keys(protocolValues).length}/${currentProtocols.length} protocols (partial data)`);
+      }
+    } else {
+      console.warn(`NAV Calculation failed: totalSupply=${openTotalSupply.data}, decimals=${openDecimals.data}`);
     }
     
     return { theoreticalPrice: price, protocolWeights: weights };
