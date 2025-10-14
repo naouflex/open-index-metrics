@@ -53,6 +53,15 @@ export class TheGraphFetcher {
       };
     } catch (error) {
       console.error(`Error fetching ${protocol} ${queryType} data:`, error.message);
+      // Return error object with null data and _unavailable flag
+      return {
+        protocol,
+        queryType,
+        data: null,
+        error: error.message,
+        _unavailable: true,
+        fetched_at: new Date().toISOString()
+      };
     }
   }
 

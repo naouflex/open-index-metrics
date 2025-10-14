@@ -39,7 +39,15 @@ export class CurveFetcher {
       };
     } catch (error) {
       console.error(`Error fetching Curve ${queryType} data:`, error.message);
-      throw error;
+      // Return error object with null data and _unavailable flag
+      return {
+        protocol: 'curve',
+        queryType,
+        data: null,
+        error: error.message,
+        _unavailable: true,
+        fetched_at: new Date().toISOString()
+      };
     }
   }
 
@@ -90,7 +98,8 @@ export class CurveFetcher {
       return totalTVL;
     } catch (error) {
       console.error(`Error fetching Curve TVL for ${tokenAddress}:`, error.message);
-      return 0;
+      // Return null instead of 0 to indicate unavailable data
+      throw error; // Throw to let fetchData handle it properly
     }
   }
 
@@ -136,7 +145,8 @@ export class CurveFetcher {
       return totalVolume;
     } catch (error) {
       console.error(`Error fetching Curve volume for ${tokenAddress}:`, error.message);
-      return 0;
+      // Throw to let fetchData handle it properly
+      throw error;
     }
   }
 
@@ -153,10 +163,10 @@ export class CurveFetcher {
         return response.data.data;
       }
       
-      return null;
+      throw new Error('Invalid response structure from Curve API');
     } catch (error) {
       console.error('Error fetching all Curve pools:', error.message);
-      return null;
+      throw error;
     }
   }
 
@@ -173,10 +183,10 @@ export class CurveFetcher {
         return response.data.data;
       }
       
-      return null;
+      throw new Error('Invalid response structure from Curve API');
     } catch (error) {
       console.error('Error fetching all Curve volumes:', error.message);
-      return null;
+      throw error;
     }
   }
 } 

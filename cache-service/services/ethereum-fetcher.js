@@ -74,8 +74,9 @@ export class EthereumFetcher {
       return {
         tokenAddress,
         holderAddress,
-        balance: 0,
+        balance: null,
         error: error.message,
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }
@@ -146,8 +147,9 @@ export class EthereumFetcher {
     } catch (error) {
       return {
         tokenAddress,
-        totalSupply: 0,
+        totalSupply: null,
         error: error.message,
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }
@@ -182,6 +184,7 @@ export class EthereumFetcher {
         method,
         data: null,
         error: error.message,
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }
@@ -278,6 +281,7 @@ export class EthereumFetcher {
         method: 'tokenInfo',
         tokenAddress: tokenAddress,
         error: error.message,
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }
@@ -355,7 +359,8 @@ export class EthereumFetcher {
       
       return parseInt(result, 16);
     } catch (error) {
-      return 0;
+      // Throw error instead of returning 0
+      throw error;
     }
   }
 
@@ -379,7 +384,8 @@ export class EthereumFetcher {
       
       return parseInt(result, 16);
     } catch (error) {
-      return 0;
+      // Throw error instead of returning 0
+      throw error;
     }
   }
 

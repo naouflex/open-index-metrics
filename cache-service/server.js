@@ -21,6 +21,7 @@ import { DefiLlamaFetcher } from './services/defillama-fetcher.js';
 import { TheGraphFetcher } from './services/thegraph-fetcher.js';
 import { EthereumFetcher } from './services/ethereum-fetcher.js';
 import { CurveFetcher } from './services/curve-fetcher.js';
+import { DataValidator } from './services/data-validator.js';
 
 // Initialize logger
 const logger = createLogger({
@@ -133,6 +134,7 @@ const curveFetcher = new CurveFetcher();
 class CacheManager {
   constructor(redisClient) {
     this.redis = redisClient;
+    this.validator = new DataValidator();
   }
 
   async get(key) {
@@ -169,7 +171,7 @@ class CacheManager {
   }
 
   /**
-   * Smart caching with different TTLs based on data type
+   * Smart caching with validation and different TTLs based on data type
    */
   async setWithSmartTTL(key, data, dataType = 'default') {
     const ttlConfig = {
@@ -185,9 +187,37 @@ class CacheManager {
     };
 
     const ttl = ttlConfig[dataType] || ttlConfig.default;
-    await this.set(key, data, ttl);
     
-    logger.info(`Smart cache set: ${key} (type: ${dataType}, TTL: ${ttl}s)`);
+    // ENHANCED: Validate data before caching
+    const previousData = await this.get(key);
+    const validation = this.validator.validate(data, previousData, dataType);
+    
+    if (!validation.isValid) {
+      logger.warn(`Data validation failed for ${key}: ${validation.reason}`);
+      
+      // If validation suggests using stale data, try that
+      if (validation.useStale) {
+        const staleKey = `${key}:stale`;
+        const staleData = await this.get(staleKey);
+        
+        if (staleData) {
+          logger.info(`Using stale data for ${key} due to validation failure`);
+          // Extend the TTL on the stale data since we're relying on it
+          await this.redis.expire(staleKey, ttl * 2);
+          
+          // Try to merge good stale values with new data
+          const mergedData = this.validator.mergeWithStaleData(data, staleData);
+          logger.info(`Merged new data with stale data for ${key}`);
+          await this.set(key, mergedData, ttl);
+          return; // Don't cache the invalid data alone
+        } else {
+          logger.warn(`No stale data available for ${key}, data validation failed but caching anyway`);
+        }
+      }
+    }
+    
+    await this.set(key, data, ttl);
+    logger.info(`Smart cache set: ${key} (type: ${dataType}, TTL: ${ttl}s, valid: ${validation.isValid})`);
   }
 
   async cleanup() {

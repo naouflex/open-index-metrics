@@ -219,14 +219,16 @@ export class CoinGeckoFetcher {
 
       const marketData = response.data.market_data;
       return {
-        volume_30d: marketData?.total_volume?.usd || 0,
+        volume_30d: marketData?.total_volume?.usd || null,
         fetched_at: new Date().toISOString()
       };
     } catch (error) {
       console.error(`Error fetching CoinGecko 30d volume for ${coinId}:`, error.message);
+      // Return null instead of 0 to indicate unavailable data
       return {
-        volume_30d: 0,
+        volume_30d: null,
         error: 'Failed to fetch 30d volume data',
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }
@@ -254,14 +256,15 @@ export class CoinGeckoFetcher {
 
       const marketData = response.data.market_data;
       return {
-        volume_24h: marketData?.total_volume?.usd || 0,
+        volume_24h: marketData?.total_volume?.usd || null,
         fetched_at: new Date().toISOString()
       };
     } catch (error) {
       console.error(`Error fetching CoinGecko 24h volume for ${coinId}:`, error.message);
       return {
-        volume_24h: 0,
+        volume_24h: null,
         error: 'Failed to fetch 24h volume data',
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }
@@ -289,14 +292,15 @@ export class CoinGeckoFetcher {
 
       const marketData = response.data.market_data;
       return {
-        market_cap: marketData?.market_cap?.usd || 0,
+        market_cap: marketData?.market_cap?.usd || null,
         fetched_at: new Date().toISOString()
       };
     } catch (error) {
       console.error(`Error fetching CoinGecko market cap for ${coinId}:`, error.message);
       return {
-        market_cap: 0,
+        market_cap: null,
         error: 'Failed to fetch market cap data',
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }
@@ -324,14 +328,15 @@ export class CoinGeckoFetcher {
 
       const marketData = response.data.market_data;
       return {
-        fdv: marketData?.fully_diluted_valuation?.usd || 0,
+        fdv: marketData?.fully_diluted_valuation?.usd || null,
         fetched_at: new Date().toISOString()
       };
     } catch (error) {
       console.error(`Error fetching CoinGecko FDV for ${coinId}:`, error.message);
       return {
-        fdv: 0,
+        fdv: null,
         error: 'Failed to fetch FDV data',
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     }

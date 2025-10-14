@@ -90,8 +90,9 @@ export class DefiLlamaFetcher {
       console.error(`Error fetching DeFiLlama TVL for ${protocolSlug}:`, error.message);
       return {
         protocol: protocolSlug,
-        tvl: 0,
+        tvl: null,
         error: error.message,
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     });
@@ -440,12 +441,13 @@ export class DefiLlamaFetcher {
       console.error(`Error fetching DeFiLlama revenue for ${protocolSlug}:`, error.message);
       return {
         protocol: protocolSlug,
-        total24h: 0,
-        total48hto24h: 0,
-        total7d: 0,
-        totalAllTime: 0,
-        change_1d: 0,
+        total24h: null,
+        total48hto24h: null,
+        total7d: null,
+        totalAllTime: null,
+        change_1d: null,
         error: error.message,
+        _unavailable: true,
         fetched_at: new Date().toISOString()
       };
     });
