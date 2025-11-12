@@ -49,6 +49,28 @@ export function getColorForMetric(value, metricType, colorMode = 'light') {
     case 'nextReleasePercentage': // Lower is better (less dilution)
       return getColorScale(value, { low: 5, medium: 15, high: 30 }, true);
     
+    case 'tvlGrowth12m': // Higher is better (growth)
+      // For 12-month TVL growth: <0% is bad, 0-50% is ok, 50-100% is good, >100% is excellent
+      if (value < 0) {
+        return colorMode === 'light' ? 'red.600' : 'red.400';
+      }
+      return getColorScale(value, { low: 20, medium: 50, high: 100 }, false);
+    
+    case 'tvlGrowthMonthlyAvg': // Higher is better (monthly growth rate)
+      // For monthly average: <0% is bad, 0-3% is ok, 3-7% is good, >7% is excellent
+      if (value < 0) {
+        return colorMode === 'light' ? 'red.600' : 'red.400';
+      }
+      return getColorScale(value, { low: 2, medium: 5, high: 10 }, false);
+    
+    case 'revenueToMarketCap': // Higher is better (revenue yield)
+      // For revenue/MC: <5% is low, 5-15% is ok, 15-30% is good, >30% is excellent
+      return getColorScale(value, { low: 5, medium: 15, high: 30 }, false);
+    
+    case 'revenueToTVL': // Higher is better (capital efficiency)
+      // For revenue/TVL: <2% is low, 2-5% is ok, 5-10% is good, >10% is excellent
+      return getColorScale(value, { low: 2, medium: 5, high: 10 }, false);
+    
     default:
       return 'gray.600';
   }

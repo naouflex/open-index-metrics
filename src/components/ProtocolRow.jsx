@@ -580,7 +580,7 @@ export default function ProtocolRow({
             <Text 
               fontSize="sm" 
               fontWeight="semibold"
-              color={tvlGrowth12m >= 0 ? useColorModeValue('green.600', 'green.400') : useColorModeValue('red.600', 'red.400')}
+              color={getColorForMetric(tvlGrowth12m, 'tvlGrowth12m', colorMode)}
             >
               {tvlGrowth12m !== 0 ? `${tvlGrowth12m > 0 ? '+' : ''}${tvlGrowth12m.toFixed(1)}%` : 'N/A'}
             </Text>
@@ -600,7 +600,7 @@ export default function ProtocolRow({
             <Text 
               fontSize="sm" 
               fontWeight="semibold"
-              color={tvlGrowthMonthlyAvg >= 0 ? useColorModeValue('green.600', 'green.400') : useColorModeValue('red.600', 'red.400')}
+              color={getColorForMetric(tvlGrowthMonthlyAvg, 'tvlGrowthMonthlyAvg', colorMode)}
             >
               {tvlGrowthMonthlyAvg !== 0 ? `${tvlGrowthMonthlyAvg > 0 ? '+' : ''}${tvlGrowthMonthlyAvg.toFixed(2)}%` : 'N/A'}
             </Text>
