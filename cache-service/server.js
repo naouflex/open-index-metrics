@@ -230,6 +230,25 @@ class CacheManager {
 let cacheManager;
 let lastRefreshTimestamp = null;
 
+// Operator API key for admin endpoints
+const OPERATOR_API_KEY = process.env.OPERATOR_API_KEY || 'operator-key-change-in-production';
+
+// Middleware to check operator authentication
+function requireOperator(req, res, next) {
+  const apiKey = req.headers['x-operator-key'] || req.query.apiKey;
+  
+  if (apiKey === OPERATOR_API_KEY) {
+    next();
+  } else {
+    logger.warn('Unauthorized admin access attempt', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      path: req.path
+    });
+    res.status(401).json({ error: 'Unauthorized - Invalid operator key' });
+  }
+}
+
 // Simple Circuit Breaker to prevent cascade failures
 class CircuitBreaker {
   constructor(threshold = 5, timeout = 60000) {
@@ -373,7 +392,7 @@ app.get('/api/admin/redis-info', async (req, res) => {
 });
 
 // Admin endpoint to flush Redis cache
-app.post('/api/admin/flush-cache', async (req, res) => {
+app.post('/api/admin/flush-cache', requireOperator, async (req, res) => {
   try {
     await redis.flushAll();
     logger.info('Redis cache flushed successfully');
@@ -393,7 +412,7 @@ app.post('/api/admin/flush-cache', async (req, res) => {
 });
 
 // Admin endpoint to flush cache via GET (easier to use in browser)
-app.get('/api/admin/flush-cache', async (req, res) => {
+app.get('/api/admin/flush-cache', requireOperator, async (req, res) => {
   try {
     await redis.flushAll();
     logger.info('Redis cache flushed successfully via GET');
