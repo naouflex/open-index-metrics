@@ -65,8 +65,8 @@ const COLUMN_DEFINITIONS = {
   fdv: 'FDV',
   volume24h: 'Volume (24hr)',
   volume30d: 'Volume (30d avg)',
-  tvlCG: 'TVL',
   mcToFdv: 'Market Cap / FDV (%)',
+  protocolTVL: 'Protocol TVL',
   tvlToMc: 'TVL / Market Cap (%)',
   tvlToFdv: 'TVL / FDV (%)',
   maxSupply: 'Max Supply',
@@ -88,7 +88,6 @@ const COLUMN_DEFINITIONS = {
   nextEmissions: 'Next 12 mo Emissions / Unlocks',
   nextReleasePercentage: 'Next 12 month release %',
   emissionsCatalyst: 'Emissions, unlocks catalyst',
-  protocolTVL: 'Protocol TVL',
   tvlGrowth12m: 'TVL Growth (12m %)',
   tvlGrowthMonthlyAvg: 'Avg Monthly TVL Growth %',
   revenue24h: 'Revenue (24h)',
@@ -523,7 +522,6 @@ export default function DeFiDashboard() {
       const fdv = coinGeckoData?.marketData?.data?.fdv || 0;
       const volume24h = coinGeckoData?.marketData?.data?.volume_24h || 0;
       const volume30d = coinGeckoData?.volume30d?.data || 0;
-      const coinGeckoTVL = coinGeckoData?.marketData?.data?.tvl || 0;
       
       // Keep max supply as tokens for all protocols
       const maxSupply = coinGeckoData?.marketData?.data?.max_supply || 0;
@@ -538,8 +536,8 @@ export default function DeFiDashboard() {
       
       const yearsOnChain = calculateYearsOnChain(protocol.mainnetLaunch);
       const mcToFdv = fdv > 0 ? marketCap / fdv : 0;
-      const tvlToMc = marketCap > 0 ? coinGeckoTVL / marketCap : 0;
-      const tvlToFdv = fdv > 0 ? coinGeckoTVL / fdv : 0;
+      const tvlToMc = marketCap > 0 ? protocolTVL / marketCap : 0;
+      const tvlToFdv = fdv > 0 ? protocolTVL / fdv : 0;
       const circToTotal = totalSupply > 0 ? circSupply / totalSupply : 0;
       const nextReleasePercentage = circSupply > 0 ? protocol.nextEmissions / circSupply : 0;
       
@@ -629,8 +627,8 @@ export default function DeFiDashboard() {
           fdv,
           volume24h,
           volume30d,
-          tvlCG: coinGeckoTVL,
           mcToFdv,
+          protocolTVL,
           tvlToMc,
           tvlToFdv,
           maxSupply,
@@ -650,7 +648,6 @@ export default function DeFiDashboard() {
           dexLiquidityTurnover,
           nextEmissions: protocol.nextEmissions,
           nextReleasePercentage,
-          protocolTVL,
           tvlGrowth12m,
           tvlGrowthMonthlyAvg,
           revenue24h,
@@ -1097,24 +1094,8 @@ export default function DeFiDashboard() {
                   Volume (30d avg)
                 </SortableHeader>
               )}
-              {visibleColumns.tvlCG && (
-                <SortableHeader 
-                  column="tvlCG" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="CoinGecko API" 
-                  fontSize="xs" 
-                  color="blue.500"
-                  minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-                  maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-                  w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-                >
-                  TVL
-                </SortableHeader>
-              )}
               
-              {/* TVL Growth - right after TVL column */}
+              {/* TVL Growth */}
               {visibleColumns.tvlGrowth12m && (
                 <SortableHeader 
                   column="tvlGrowth12m" 
@@ -1165,6 +1146,24 @@ export default function DeFiDashboard() {
                   Market Cap / FDV (%)
                 </SortableHeader>
               )}
+              
+              {/* Protocol TVL - positioned before TVL ratio columns */}
+              {visibleColumns.protocolTVL && (
+                <SortableHeader 
+                  column="protocolTVL" 
+                  currentSort={sortConfig} 
+                  onSort={handleSort} 
+                  onReset={handleReset} 
+                  dataSource="DeFiLlama API" 
+                  fontSize="xs"
+                  minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                  w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+                >
+                  Protocol TVL<br/>(exclude staking)
+                </SortableHeader>
+              )}
+              
               {visibleColumns.tvlToMc && (
                 <SortableHeader 
                   column="tvlToMc" 
@@ -1512,23 +1511,6 @@ export default function DeFiDashboard() {
                   w={{ base: "180px", sm: "210px", md: "240px", lg: "270px" }}
                 >
                   Emissions, unlocks catalyst
-                </SortableHeader>
-              )}
-              
-              {/* Protocol TVL */}
-              {visibleColumns.protocolTVL && (
-                <SortableHeader 
-                  column="protocolTVL" 
-                  currentSort={sortConfig} 
-                  onSort={handleSort} 
-                  onReset={handleReset} 
-                  dataSource="DeFiLlama API" 
-                  fontSize="xs"
-                  minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                  maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                  w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-                >
-                  Protocol TVL<br/>(exclude staking)
                 </SortableHeader>
               )}
               

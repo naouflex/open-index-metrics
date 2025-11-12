@@ -18,8 +18,8 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     'FDV',
     'Volume 24h',
     'Volume 30d Avg',
-    'TVL',
     'Market Cap / FDV (%)',
+    'Protocol TVL',
     'TVL / Market Cap (%)',
     'TVL / FDV (%)',
     'Max Supply',
@@ -41,7 +41,6 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     'Next 12mo Emissions',
     'Next 12mo Release %',
     'Emissions Catalyst',
-    'Protocol TVL',
     'TVL Growth (12m %)',
     'Avg Monthly TVL Growth %',
     'Revenue (24h)',
@@ -72,7 +71,6 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     const fdv = coinGeckoData?.marketData?.data?.fdv || 0;
     const volume24h = coinGeckoData?.marketData?.data?.volume_24h || 0;
     const volume30d = coinGeckoData?.volume30d?.data || 0;
-    const coinGeckoTVL = coinGeckoData?.marketData?.data?.tvl || 0;
     const maxSupply = coinGeckoData?.marketData?.data?.max_supply || 0;
     const totalSupply = protocol.ticker === 'ALCX' 
       ? ((coinGeckoData?.marketData?.data?.total_supply || 0) - (alcxDeadBalance?.data?.balance || 0))
@@ -82,8 +80,8 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
     
     const yearsOnChain = calculateYearsOnChain(protocol.mainnetLaunch);
     const mcToFdv = fdv > 0 ? (marketCap / fdv) * 100 : 0;
-    const tvlToMc = marketCap > 0 ? (coinGeckoTVL / marketCap) * 100 : 0;
-    const tvlToFdv = fdv > 0 ? (coinGeckoTVL / fdv) * 100 : 0;
+    const tvlToMc = marketCap > 0 ? (protocolTVL / marketCap) * 100 : 0;
+    const tvlToFdv = fdv > 0 ? (protocolTVL / fdv) * 100 : 0;
     const circToTotal = totalSupply > 0 ? (circSupply / totalSupply) * 100 : 0;
     const nextReleasePercentage = circSupply > 0 ? (protocol.nextEmissions / circSupply) * 100 : 0;
 
@@ -186,8 +184,8 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
       fdv,
       volume24h,
       volume30d,
-      coinGeckoTVL,
       mcToFdv.toFixed(2),
+      protocolTVL,
       tvlToMc.toFixed(2),
       tvlToFdv.toFixed(2),
       maxSupply,
@@ -209,7 +207,6 @@ export function exportToCSV(protocols, allCoinGeckoData, allDefiLlamaTVL, allFxn
       protocol.nextEmissions,
       nextReleasePercentage.toFixed(2),
       protocol.emissionsCatalyst || 'N/A',
-      protocolTVL,
       tvlGrowth12m !== 0 ? tvlGrowth12m.toFixed(1) : 'N/A',
       tvlGrowthMonthlyAvg !== 0 ? tvlGrowthMonthlyAvg.toFixed(2) : 'N/A',
       revenue24h,

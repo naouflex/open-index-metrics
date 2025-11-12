@@ -158,8 +158,6 @@ export default function ProtocolRow({
   const fdv = coinGeckoData.marketData?.data?.fdv || 0;
   const volume24h = coinGeckoData.marketData?.data?.volume_24h || 0;
   const volume30d = coinGeckoData.volume30d?.data || 0;
-  const coinGeckoTVL = coinGeckoData.marketData?.data?.tvl || 0;
-
 
   const maxSupply = coinGeckoData.marketData?.data?.max_supply || 0;
 
@@ -238,8 +236,8 @@ export default function ProtocolRow({
 
   // Ratios
   const mcToFdv = fdv > 0 ? marketCap / fdv : 0;
-  const tvlToMc = marketCap > 0 ? coinGeckoTVL / marketCap : 0;
-  const tvlToFdv = fdv > 0 ? coinGeckoTVL / fdv : 0;
+  const tvlToMc = marketCap > 0 ? protocolTVL / marketCap : 0;
+  const tvlToFdv = fdv > 0 ? protocolTVL / fdv : 0;
   const circToTotal = totalSupply > 0 ? circSupply / totalSupply : 0;
   const nextReleasePercentage = circSupply > 0 ? protocol.nextEmissions / circSupply : 0;
 
@@ -569,23 +567,8 @@ export default function ProtocolRow({
           </Skeleton>
         </Td>
       )}
-
-      {visibleColumns.tvlCG && (
-        <Td
-          textAlign="center"
-          minW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-          maxW={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-          w={{ base: "60px", sm: "65px", md: "75px", lg: "80px" }}
-        >
-          <Skeleton isLoaded={!isLoading}>
-            <Text fontSize="sm" color={coinGeckoTVL > 0 ? "blue.500" : "gray.400"} fontWeight={coinGeckoTVL > 0 ? "semibold" : "normal"}>
-              {coinGeckoTVL > 0 ? formatNumber(coinGeckoTVL) : "N/A"}
-            </Text>
-          </Skeleton>
-        </Td>
-      )}
       
-      {/* TVL Growth 12m - right after TVL column */}
+      {/* TVL Growth */}
       {visibleColumns.tvlGrowth12m && (
         <Td
           textAlign="center"
@@ -640,6 +623,20 @@ export default function ProtocolRow({
           >
             {formatPercentage(mcToFdv)}
           </Text>
+        </Td>
+      )}
+
+      {/* Protocol TVL - positioned before TVL ratio columns */}
+      {visibleColumns.protocolTVL && (
+        <Td
+          textAlign="center"
+          minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+          maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+          w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
+        >
+          <Skeleton isLoaded={!defiLlamaTVL.isLoading}>
+            <Text fontSize="sm" fontWeight="semibold">{formatNumber(protocolTVL)}</Text>
+          </Skeleton>
         </Td>
       )}
 
@@ -1016,18 +1013,6 @@ export default function ProtocolRow({
           >
             {protocol.emissionsCatalyst || 'N/A'}
             </Text>
-          </Skeleton>
-        </Td>
-      )}
-      {visibleColumns.protocolTVL && (
-        <Td
-          textAlign="center"
-          minW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-          maxW={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-          w={{ base: "75px", sm: "90px", md: "105px", lg: "120px" }}
-        >
-          <Skeleton isLoaded={!defiLlamaTVL.isLoading}>
-            <Text fontSize="sm" fontWeight="semibold">{formatNumber(protocolTVL)}</Text>
           </Skeleton>
         </Td>
       )}
